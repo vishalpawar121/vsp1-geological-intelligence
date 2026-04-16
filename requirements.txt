@@ -1,3 +1,7 @@
 streamlit
 scikit-learn
 numpy
+pandas
+folium
+streamlit-js-eval
+requests
