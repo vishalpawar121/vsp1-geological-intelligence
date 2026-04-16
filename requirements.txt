@@ -3,5 +3,6 @@ scikit-learn
 numpy
 pandas
 folium
+streamlit-folium
 streamlit-js-eval
 requests
