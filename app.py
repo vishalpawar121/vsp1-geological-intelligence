@@ -153,3 +153,76 @@ water_val = st.slider("Water Table Depth (m)", 0.5, 10.0, value=st.session_state
 
 if st.button("ANALYSE SITE"):
     st.success(f"Analysing site at {lat}, {lon} with Soil Strength: {soil_val} kPa")
+import streamlit as st
+
+# 1. GEOLOGICAL DATABASE (Expand this as you gather more data)
+REGION_DATA = {
+    "Dhayari": {
+        "soil_strength": 401, 
+        "water_table": 3.50, 
+        "seismic": 5, 
+        "soil_index": 0  # 0: Black Cotton
+    },
+    "Kothrud": {
+        "soil_strength": 450, 
+        "water_table": 8.20, 
+        "seismic": 4, 
+        "soil_index": 1  # 1: Hard Rock
+    }
+}
+
+# 2. INITIALIZE SESSION STATE (Prevents errors on first load)
+if 'soil_val' not in st.session_state:
+    st.session_state.soil_val = 80
+if 'water_val' not in st.session_state:
+    st.session_state.water_val = 10.0
+if 'seismic_val' not in st.session_state:
+    st.session_state.seismic_val = 1
+if 'soil_type_idx' not in st.session_state:
+    st.session_state.soil_type_idx = 0
+
+# --- UI HEADER ---
+st.title("VSP-1 Geological Intelligence System")
+st.markdown("---")
+
+# 3. LOCATION DATA (Your GPS Logic)
+lat, lon = 18.4391951, 73.8148597 
+st.info(f"📍 GPS Locked: {lat}, {lon}")
+
+# 4. AUTOMATION TRIGGER
+if st.button("✨ AUTO-FETCH SITE PARAMETERS"):
+    # Logic: If coordinates are near Dhayari, fetch Dhayari data
+    # (In the future, use a geocoder here)
+    data = REGION_DATA["Dhayari"]
+    
+    # Update Session State
+    st.session_state.soil_val = data['soil_strength']
+    st.session_state.water_val = data['water_table']
+    st.session_state.seismic_val = data['seismic']
+    st.session_state.soil_type_idx = data['soil_index']
+    st.success("Parameters updated for Dhayari Region!")
+
+st.markdown("---")
+
+# 5. DYNAMIC INPUTS (Linked to Session State)
+soil_options = ["Black Cotton Soil", "Hard Rock/Murrum", "Silt/Clay"]
+soil_type = st.selectbox("Soil Type", options=soil_options, index=st.session_state.soil_type_idx)
+
+seismic_val = st.slider("Seismic Risk (1-10)", 1, 10, value=st.session_state.seismic_val)
+soil_val = st.slider("Soil Strength (kPa)", 80, 500, value=st.session_state.soil_val)
+water_val = st.slider("Water Table Depth (m)", 0.5, 10.0, value=st.session_state.water_val)
+
+# 6. INTELLIGENT ANALYSIS
+if st.button("ANALYSE SITE", type="primary"):
+    st.subheader("Final Geotechnical Report")
+    
+    # Risk Calculation Logic
+    if soil_type == "Black Cotton Soil" and water_val < 4.0:
+        st.error("🚨 CRITICAL RISK: High expansion potential. Specialized foundation (Under-reamed piles) required.")
+    elif soil_val > 400:
+        st.success("✅ STABLE: High bearing capacity. Standard isolated footings recommended.")
+    else:
+        st.warning("⚠️ MODERATE: Deep excavation recommended to reach stable strata.")
+
+    st.write(f"**Analysis Summary:** Site at {lat}, {lon} shows {soil_type} with a bearing capacity of {soil_val} kPa.")
+    
