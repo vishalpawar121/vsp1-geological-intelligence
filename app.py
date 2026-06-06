@@ -52,7 +52,6 @@ project_types = [
 ]
 selected_project = st.sidebar.selectbox("Project Type", project_types, index=0)
 
-
 # Risk parameters in sidebar
 seismic = st.sidebar.slider("Seismic Risk (1-10)", 1, 10, 5)
 strength = st.sidebar.slider("Soil Strength (kPa)", 80, 500, 175)
