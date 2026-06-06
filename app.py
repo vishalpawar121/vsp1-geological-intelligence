@@ -35,18 +35,17 @@ model = RandomForestClassifier(n_estimators=200, random_state=42)
 model.fit(X, y)
 
 # --- 2. SIDEBAR CONFIGURATION ---
-st.sidebar.header("Site Configuration")
+st.sidebar.header("📍 Site Configuration")
 
 location = st.sidebar.text_input("Location Name", value="Pune, Maharashtra")
 soil_types = ["Black Cotton Soil", "Soft Clay", "Alluvial", "Sandy", "Hard Rock", "Granite Rock", "Mixed", "Rocky"]
 selected_soil = st.sidebar.selectbox("Soil Type", soil_types, index=0)
 
 project_types = [
-    "Residential Housing", 
-    "Commercial Building", 
-    "Bridge / Road Infrastructures", 
-    "Smart City District", 
-    "Hospital / Critical Care Facility", 
+    "Residential Housing",
+    "Smart City Districts",
+    "Bridge and Road Infrastructures",
+    "Hospital and Critical Care Facility",
     "Industrial Warehouse"
 ]
 selected_project = st.sidebar.selectbox("Project Type", project_types, index=0)
@@ -141,15 +140,14 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
 
     # Display status
     if prediction == 0:
-        st.success(f"Success - {risk_label} | VSP Score: {score} | ML Confidence: {conf_pct}%")
+        st.success(f"Status - {risk_label} | VSP Score: {score} | ML Confidence: {conf_pct}%")
     elif prediction == 1:
-        st.warning(f"Warning - {risk_label} | VSP Score: {score} | ML Confidence: {conf_pct}%")
+        st.warning(f"Status - {risk_label} | VSP Score: {score} | ML Confidence: {conf_pct}%")
     else:
-        st.error(f"Alert - {risk_label} | VSP Score: {score} | ML Confidence: {conf_pct}%")
+        st.error(f"Status - {risk_label} | VSP Score: {score} | ML Confidence: {conf_pct}%")
 
     # Structural recommendations
     depth = round(2.0 + water * 0.3, 1) if prediction == 0 else round(5.0 + water * 0.6, 1)
-    foundation = "Standard Foundation" if prediction == 0 else "Deep Pile Foundation"
 
     result_col1, result_col2 = st.columns(2)
 
@@ -162,54 +160,54 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
         """)
         
     with result_col2:
-        st.subheader("Multihazard Safety & Structural Directive")
+        st.subheader("Multihazard Safety and Structural Directive")
         
-        # --- DYNAMIC STRUCTURAL LOGIC BASED ON PROJECT TYPE ---
+        # --- ULTIMATE SURVIVAL MATRIX: DYNAMIC STRUCTURAL LOGIC ---
         if selected_project == "Residential Housing":
-            foundation = "Deep Pile Foundation (7.1m depth)"
-            seismic_tech = "Base Isolation System (Rubber Bearings)"
-            water_defense = "Sub-surface French Drains and Waterproof Plinth Protection"
-            wind_spec = "Symmetrical Shear Wall Layout (up to 140 km/h resistance)"
-            factor_safety = "1.5x (Standard Residential)"
+            foundation = "Deep Friction Piles bypass expansive topsoil to reach hard bedrock"
+            seismic_tech = "Base Isolation Systems using heavy-duty laminate rubber and lead core bearings"
+            water_defense = "Elevated Plinth Beam Architecture with sub-surface French Drains"
+            wind_spec = "Symmetrical Concrete Shear Walls designed for twisting forces up to 140 km/h"
+            factor_safety = "1.5x Structural Safety Multiplier"
             
-        elif selected_project == "Smart City District":
-            foundation = "Integrated Raft + Micro-Pile Network (Grid Stability)"
-            seismic_tech = "Tuned Mass Dampers + Flexible Utility Conduit Links"
-            water_defense = "Sponge-City Permeable Pavements and Automated Stormwater Sump Gates"
-            wind_spec = "Aerodynamic Facade Geometry and Vortex Resisting Cladding"
-            factor_safety = "2.5x (High Urban Resilience)"
+        elif selected_project == "Smart City Districts":
+            foundation = "Integrated Raft and Micro-Pile Grid Network to distribute massive urban loads evenly"
+            seismic_tech = "Tuned Mass Dampers paired with flexible rubberized underground utility conduit loops"
+            water_defense = "Sponge-City Protocol using permeable concrete roads and automated storm sump gates"
+            wind_spec = "Aerodynamic Facade Geometry with curved corners to break up destructive wind vortices"
+            factor_safety = "2.5x High Urban Resilience Multiplier"
             
-        elif selected_project == "Commercial Building":
-            foundation = "Friction Piles into Hard Rock Strata"
-            seismic_tech = "Energy-Dissipating Steel Bracing Frames"
-            water_defense = "Dual-Pump Retention Pit and Basement Slurry Walls"
-            wind_spec = "Rigid Core-Wall System with Wind-Tunnel Tested Glazing"
-            factor_safety = "2.0x (Commercial Safety Standard)"
+        elif selected_project == "Bridge and Road Infrastructures":
+            foundation = "Cast-in-Situ Concrete Caissons Pier Foundations sunk deeply into riverbeds"
+            seismic_tech = "Seismic Dampeners and Expansion Decks allowing independent lane swaying without collapse"
+            water_defense = "Heavy Rip-Rap Armouring interlocking stones to prevent underwater pier scouring"
+            wind_spec = "Aerodynamic Box-Girder Decks acting like an inverted wing to stay pressed down and stable"
+            factor_safety = "2.2x Infrastructure Safety Multiplier"
             
-        elif selected_project == "Hospital / Critical Care Facility":
-            foundation = "Heavy-Duty End-Bearing Piles with Extended Sockets"
-            seismic_tech = "Active Base Isolation + Independent Structural Seismic Joints"
-            water_defense = "Elevated Critical Infrastructure (Generators on 1st Floor Level)"
-            wind_spec = "Impact-Resistant Hardened Structure (Category V Storm Protection)"
-            factor_safety = "3.0x (Maximum Critical Safety)"
+        elif selected_project == "Hospital and Critical Care Facility":
+            foundation = "Heavy-Duty End-Bearing Piles with Extended Rock Sockets for zero settlement risk"
+            seismic_tech = "Active Mass Dampers and completely independent structural expansion joints between wings"
+            water_defense = "100-Year Flood Line Clearance keeping critical generators strictly on the first floor or higher"
+            wind_spec = "Category V Hurricane Armor Shell with missile-grade shatterproof structural glazing"
+            factor_safety = "3.0x Maximum Critical Safety Multiplier"
             
-        else: # Infrastructure / Warehouses Default
-            foundation = "Isolated Spread Footings with Tie-Beams"
-            seismic_tech = "Cross-Braced Flexible Framing"
-            water_defense = "Surface Ditches and Perimeter Catch-Basins"
-            wind_spec = "Anchor Bolt Up-lift Protection Brackets"
-            factor_safety = "1.8x"
+        else: # Industrial Warehouse Default
+            foundation = "Isolated Spread Footings with Continuous Tie-Beams for heavy machinery vibration"
+            seismic_tech = "Ductile Cross-Braced Steel Framing layouts to absorb shockwaves"
+            water_defense = "Wide open perimeter catch-basins and high-volume gravity drainage outfalls"
+            wind_spec = "Heavy-Duty Anchor Bolt Base-Plates and roof up-lift protection brackets"
+            factor_safety = "1.8x Industrial Safety Multiplier"
 
         # Displaying the safety requirements neatly to the client
         st.success(f"""
         * **Recommended Foundation:** {foundation}
-        * **Earthquake / Seismic Shield:** {seismic_tech}
+        * **Earthquake and Seismic Shield:** {seismic_tech}
         * **Flood and Water Defense:** {water_defense}
         * **Wind Load Engineering:** {wind_spec}
         * **Structural Safety Multiplier:** {factor_safety}
         """)
         
-        # --- 6. ENTERPRISE PDF GENERATION ENGINE ---
+        # --- ENTERPRISE PDF GENERATION ENGINE ---
         st.markdown("---")
         st.subheader("Enterprise Deliverables")
 
@@ -253,28 +251,28 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
         pdf.set_fill_color(240, 242, 246)
         
         # Row 1
-        pdf.cell(45, 8, ' Target Location:', border=1, fill=True)
+        pdf.cell(45, 8, 'Target Location:', border=1, fill=True)
         pdf.set_font('Helvetica', '', 11)
-        pdf.cell(135, 8, f' {location}', border=1, ln=True)
+        pdf.cell(135, 8, f'{location}', border=1, ln=True)
         
         # Row 2
         pdf.set_font('Helvetica', 'B', 11)
-        pdf.cell(45, 8, ' Identified Soil:', border=1, fill=True)
+        pdf.cell(45, 8, 'Identified Soil:', border=1, fill=True)
         pdf.set_font('Helvetica', '', 11)
-        pdf.cell(135, 8, f' {selected_soil}', border=1, ln=True)
+        pdf.cell(135, 8, f'{selected_soil}', border=1, ln=True)
 
         # Row 3
         pdf.set_font('Helvetica', 'B', 11)
-        pdf.cell(45, 8, ' Project Framework:', border=1, fill=True)
+        pdf.cell(45, 8, 'Project Framework:', border=1, fill=True)
         pdf.set_font('Helvetica', '', 11)
-        pdf.cell(135, 8, f' {selected_project}', border=1, ln=True)
+        pdf.cell(135, 8, f'{selected_project}', border=1, ln=True)
 
         # Row 4
         pdf.set_font('Helvetica', 'B', 11)
-        pdf.cell(45, 8, ' Evaluated Risk:', border=1, fill=True)
+        pdf.cell(45, 8, 'Evaluated Risk:', border=1, fill=True)
         pdf.set_font('Helvetica', 'B', 11)
         pdf.set_text_color(200, 30, 30)
-        pdf.cell(135, 8, f' {risk_label} (VSP Score: {score})', border=1, ln=True)
+        pdf.cell(135, 8, f'{risk_label} (VSP Score: {score})', border=1, ln=True)
         
         pdf.ln(8)
 
@@ -284,11 +282,11 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
         pdf.cell(0, 10, 'Multihazard Engineering Specifications', ln=True)
         pdf.ln(2)
 
-        # Engineering Spec Details blocks
+        # Engineering Spec Details blocks - CLEAN FOR PDF (NO EMOJIS)
         specs = [
-            ("Foundation Design", f"{foundation} at target depth of {depth}m"),
+            ("Foundation Design", f"{foundation}"),
             ("Seismic Shielding", seismic_tech),
-            ("Flood/Hydrological Defense", water_defense),
+            ("Flood and Hydrological Defense", water_defense),
             ("Wind Force Engineering", wind_spec),
             ("Structural Safety Multiplier", factor_safety)
         ]
@@ -297,17 +295,17 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
             pdf.set_font('Helvetica', 'B', 11)
             pdf.set_text_color(0, 102, 102)
             pdf.cell(0, 6, f'- {title}', ln=True)
-            pdf.set_font('Helvetica', '', 11)
+            pdf.set_font('Helvetica', '', 10)
             pdf.set_text_color(50, 50, 50)
-            pdf.multi_cell(0, 6, f'  {detail}')
-            pdf.ln(2)
+            pdf.multi_cell(0, 5, f'{detail}')
+            pdf.ln(1)
 
         # Output the PDF as bytes
         pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
         # Clean, full-width Streamlit Download Button targeting the PDF binary
         st.download_button(
-            label="Download Professional Feasibility Report (PDF)",
+            label="Download Professional Feasibility Report PDF",
             data=pdf_bytes,
             file_name=f"VSP1_Geological_Report_{location.replace(' ', '_')}.pdf",
             mime="application/pdf",
