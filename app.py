@@ -162,7 +162,7 @@ if st.button("🔍 ANALYSE SITE", type="primary", use_container_width=True):
         * **Intended Use Case:** {selected_project}
         """)
         
-    with res_col2:
+    with result_col2:
         st.subheader("🏗️ Multihazard Safety & Structural Directive")
         
         # --- DYNAMIC STRUCTURAL LOGIC BASED ON PROJECT TYPE ---
