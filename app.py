@@ -43,8 +43,15 @@ col1, col2 = st.columns(2)
 
 with col1:
     if loc:
-        lat = loc['coords']['latitude']
-        lon = loc['coords']['longitude']
+        # --- SAFETY CHECK FOR GEOLOCATION ---
+# If browser location is not loaded yet, use Pune as default so it never crashes!
+if loc and 'coords' in loc and loc['coords']:
+    lat = loc['coords']['latitude']
+    lon = loc['coords']['longitude']
+else:
+    lat = 18.5204  # Default Pune Latitude
+    lon = 73.8567  # Default Pune Longitude
+    
         location = st.text_input("Location Name", f"GPS Locked: {lat}, {lon}")
         st.success("🛰️ Satellite Signal Verified")
     else:
