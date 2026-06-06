@@ -58,7 +58,7 @@ else:
         lat, lon = 18.5204, 73.8567 # Default Pune
     
     soil_type = st.selectbox("Soil Type", ["Black Cotton Soil","Soft Clay","Alluvial","Sandy","Hard Rock","Granite Rock","Mixed","Rocky"])
-    project_type = st.selectbox("Project Type", ["Residential Housing","Commercial Building","Bridge / Road","Smart city# Make sure this 'if' line touches the very left wall of your screen:
+    project_type = st.selectbox("Project Type", ["Residential Housing", "Commercial Building", "Bridge / Road", "Smart City"])
 if loc and 'coords' in loc and loc['coords']:
     lat = loc['coords']['latitude']   # <-- Hit TAB once before typing this line
     lon = loc['coords']['longitude']  # <-- Hit TAB once before typing this line
