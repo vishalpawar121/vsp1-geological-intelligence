@@ -7,3 +7,4 @@ streamlit-folium
 streamlit-js-eval
 requests
 fpdf
+plotly
