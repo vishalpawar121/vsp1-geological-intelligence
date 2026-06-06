@@ -42,8 +42,16 @@ location = st.sidebar.text_input("Location Name", value="Pune, Maharashtra")
 soil_types = ["Black Cotton Soil", "Soft Clay", "Alluvial", "Sandy", "Hard Rock", "Granite Rock", "Mixed", "Rocky"]
 selected_soil = st.sidebar.selectbox("Soil Type", soil_types, index=0)
 
-project_types = ["Residential Housing", "Commercial Building", "Bridge / Road", "Smart City District", "Hospital", "Industrial Facility"]
+project_types = [
+    "Residential Housing", 
+    "Commercial Building", 
+    "Bridge / Road Infrastructures", 
+    "Smart City District", 
+    "Hospital / Critical Care Facility", 
+    "Industrial Warehouse"
+]
 selected_project = st.sidebar.selectbox("Project Type", project_types, index=0)
+
 
 # Risk parameters in sidebar
 seismic = st.sidebar.slider("Seismic Risk (1-10)", 1, 10, 5)
@@ -154,34 +162,188 @@ if st.button("🔍 ANALYSE SITE", type="primary", use_container_width=True):
         * **Identified Strata:** {selected_soil}
         * **Intended Use Case:** {selected_project}
         """)
+        
+    with res_col2:
+        st.subheader("🏗️ Multihazard Safety & Structural Directive")
+        
+        # --- DYNAMIC STRUCTURAL LOGIC BASED ON PROJECT TYPE ---
+        if selected_project == "Residential Housing":
+            foundation = "Deep Pile Foundation (7.1m depth)"
+            seismic_tech = "Base Isolation System (Rubber Bearings)"
+            water_defense = "Sub-surface French Drains & Waterproof Plinth Protection"
+            wind_spec = "Symmetrical Shear Wall Layout (up to 140 km/h resistance)"
+            factor_safety = "1.5x (Standard Residential)"
+            
+        elif selected_project == "Smart City District":
+            foundation = "Integrated Raft + Micro-Pile Network (Grid Stability)"
+            seismic_tech = "Tuned Mass Dampers + Flexible Utility Conduit Links"
+            water_defense = "Sponge-City Permeable Pavements & Automated Stormwater Sump Gates"
+            wind_spec = "Aerodynamic Facade Geometry & Vortex Resisting Cladding"
+            factor_safety = "2.5x (High Urban Resilience)"
+            
+        elif selected_project == "Commercial Building":
+            foundation = "Friction Piles into Hard Rock Strata"
+            seismic_tech = "Energy-Dissipating Steel Bracing Frames"
+            water_defense = "Dual-Pump Retention Pit & Basement Slurry Walls"
+            wind_spec = "Rigid Core-Wall System with Wind-Tunnel Tested Glazing"
+            factor_safety = "2.0x (Commercial Safety Standard)"
+            
+        elif selected_project == "Hospital / Critical Care Facility":
+            foundation = "Heavy-Duty End-Bearing Piles with Extended Sockets"
+            seismic_tech = "Active Base Isolation + Independent Structural Seismic Joints"
+            water_defense = "Elevated Critical Infrastructure (Generators on 1st Floor Level)"
+            wind_spec = "Impact-Resistant Hardened Structure (Category V Storm Protection)"
+            factor_safety = "3.0x (Maximum Critical Safety)"
+            
+        else: # Infrastructure / Warehouses Default
+            foundation = "Isolated Spread Footings with Tie-Beams"
+            seismic_tech = "Cross-Braced Flexible Framing"
+            water_defense = "Surface Ditches & Perimeter Catch-Basins"
+            wind_spec = "Anchor Bolt Up-lift Protection Brackets"
+            factor_safety = "1.8x"
 
-    with result_col2:
-        st.subheader("🏗️ Structural Engineering Directive")
+        # Displaying the safety requirements neatly to the client
         st.success(f"""
         * **Recommended Foundation:** {foundation}
-        * **Target Depth:** {depth}m
-        * **Engineering Note:** Site-specific analysis based on soil strength and water table depth.
+        * **⚡ Earthquake / Seismic Shield:** {seismic_tech}
+        * **🌊 Flood & Water Defense:** {water_defense}
+        * **💨 Wind Load Engineering:** {wind_spec}
+        * **🛡️ Structural Safety Multiplier:** {factor_safety}
         """)
+        
+        report_data = f"""==================================================
+VSP-1 GEOLOGICAL FEASIBILITY REPORT
+==================================================
+Location Analyzed: {location}
+Soil Type Identified: {selected_soil}
+Project Framework: {selected_project}
+Risk Category Level: {risk_label}
+Computed VSP Score: {score}
 
-    # PDF Download
-    st.markdown("---")
-    st.subheader("📄 Enterprise Deliverables")
-    report_data = f"""VSP-1 Geological Feasibility Report
-Location: {location}
-Soil Type: {selected_soil}
-Project Type: {selected_project}
-Foundation Recommendation: {foundation} ({depth}m)
-Risk Level: {risk_label}
-VSP Score: {score}"""
+--------------------------------------------------
+📐 STRUCTURAL ENGINEERING SAFETY MATRIX
+--------------------------------------------------
+Recommended Foundation: {foundation}
+Target Strata Depth: {depth} meters
 
-    st.download_button(
-        label="📥 Download Professional Feasibility Report (PDF)",
-        data=report_data,
-        file_name=f"VSP1_Report_{location.replace(' ', '_')}.txt",
-        mime="text/plain",
-        use_container_width=True
-    )
+⚡ Seismic Shielding:
+   -> {seismic_tech}
 
+🌊 Flood & Hydrological Defense:
+   -> {water_defense}
+
+💨 Wind Force Engineering Spec:
+   -> {wind_spec}
+
+🛡️ Structural Safety Multiplier:
+   -> {factor_safety}
+=================================================="""
+        
+        # --- 6. ENTERPRISE PDF GENERATION ENGINE ---
+        st.markdown("---")
+        st.subheader("📄 Enterprise Deliverables")
+
+        from fpdf import FPDF
+
+        class VSP1Report(FPDF):
+            def header(self):
+                # Teal colored top header band
+                self.set_fill_color(0, 128, 128)
+                self.rect(0, 0, 210, 35, 'F')
+                
+                self.set_text_color(255, 255, 255)
+                self.set_font('Helvetica', 'B', 22)
+                self.cell(0, 10, 'VSP-1 GEOLOGICAL INTELLIGENCE SYSTEM', ln=True, align='L')
+                
+                self.set_font('Helvetica', 'I', 10)
+                self.cell(0, 5, 'Automated Engineering Feasibility Brief & Risk Matrix', ln=True, align='L')
+                self.ln(15)
+
+            def footer(self):
+                self.set_y(-15)
+                self.set_font('Helvetica', 'I', 8)
+                self.set_text_color(128, 128, 128)
+                self.cell(0, 10, f'Page {self.page_no()} | Generated Automatically by VSP-1 Core Engine', align='C')
+
+        # Initialize PDF Document
+        pdf = VSP1Report()
+        pdf.add_page()
+        pdf.set_margins(15, 20, 15)
+
+        # Title Block
+        pdf.set_text_color(33, 33, 33)
+        pdf.set_font('Helvetica', 'B', 16)
+        pdf.cell(0, 10, f'Geotechnical Assessment: {location}', ln=True)
+        pdf.set_draw_color(0, 128, 128)
+        pdf.line(15, 47, 195, 47)
+        pdf.ln(5)
+
+        # Metadata Section Table
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.set_fill_color(240, 242, 246)
+        
+        # Row 1
+        pdf.cell(45, 8, ' Target Location:', border=1, fill=True)
+        pdf.set_font('Helvetica', '', 11)
+        pdf.cell(135, 8, f' {location}', border=1, ln=True)
+        
+        # Row 2
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.cell(45, 8, ' Identified Soil:', border=1, fill=True)
+        pdf.set_font('Helvetica', '', 11)
+        pdf.cell(135, 8, f' {selected_soil}', border=1, ln=True)
+
+        # Row 3
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.cell(45, 8, ' Project Framework:', border=1, fill=True)
+        pdf.set_font('Helvetica', '', 11)
+        pdf.cell(135, 8, f' {selected_project}', border=1, ln=True)
+
+        # Row 4
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.cell(45, 8, ' Evaluated Risk:', border=1, fill=True)
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.set_text_color(200, 30, 30) # Red-colored text for risk
+        pdf.cell(135, 8, f' {risk_label} (VSP Score: {score})', border=1, ln=True)
+        
+        pdf.ln(8)
+
+        # Structural Matrix Title
+        pdf.set_text_color(33, 33, 33)
+        pdf.set_font('Helvetica', 'B', 14)
+        pdf.cell(0, 10, '🛡️ Multihazard Engineering Specifications', ln=True)
+        pdf.ln(2)
+
+        # Engineering Spec Details blocks
+        specs = [
+            ("Foundation Design", f"{foundation} at target depth of {depth}m"),
+            ("Seismic Shielding", seismic_tech),
+            ("Flood/Hydrological Defense", water_defense),
+            ("Wind Force Engineering", wind_spec),
+            ("Structural Safety Multiplier", factor_safety)
+        ]
+
+        for title, detail in specs:
+            pdf.set_font('Helvetica', 'B', 11)
+            pdf.set_text_color(0, 102, 102)
+            pdf.cell(0, 6, f'• {title}', ln=True)
+            pdf.set_font('Helvetica', '', 11)
+            pdf.set_text_color(50, 50, 50)
+            pdf.multi_cell(0, 6, f'  {detail}')
+            pdf.ln(2)
+
+        # Output the PDF as bytes
+        pdf_bytes = pdf.output(dest='S').encode('latin-1')
+
+        # Clean, full-width Streamlit Download Button targeting the PDF binary
+        st.download_button(
+            label="📥 Download Professional Feasibility Report (PDF)",
+            data=pdf_bytes,
+            file_name=f"VSP1_Geological_Report_{location.replace(' ', '_')}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+        
 else:
     st.info("💡 Adjust parameters in the left sidebar and click **ANALYSE SITE** to run your geological assessment model.")
 
