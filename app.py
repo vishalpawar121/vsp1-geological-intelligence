@@ -333,16 +333,26 @@ for title, detail in specs:
     
 
         # Output the PDF as bytes
-        pdf_bytes = pdf.output(dest='S').encode('latin-1')
+for title, detail in specs:
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(0, 102, 102)
+    pdf.cell(0, 6, f'- {title}', ln=True)
+    pdf.set_font('Helvetica', '', 11)
+    pdf.set_text_color(50, 50, 50)
+    pdf.multi_cell(0, 6, f'  {detail}')
+    pdf.ln(2)
 
-        # Clean, full-width Streamlit Download Button targeting the PDF binary
-        st.download_button(
-            label="📥 Download Professional Feasibility Report (PDF)",
-            data=pdf_bytes,
-            file_name=f"VSP1_Geological_Report_{location.replace(' ', '_')}.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
+# >>> THESE LINES NOW ALIGN PERFECTLY UNDER THE 'for' WORD LAYOUT <<<
+pdf_bytes = pdf.output(dest='S').encode('latin-1')
+
+st.download_button(
+    label="Download Professional Feasibility Report (PDF)",
+    data=pdf_bytes,
+    file_name=f"VSP1_Geological_Report_{location.replace(' ', '_')}.pdf",
+    mime="application/pdf",
+    use_container_width=True
+)
+
         
 else:
     st.info("💡 Adjust parameters in the left sidebar and click **ANALYSE SITE** to run your geological assessment model.")
