@@ -43,8 +43,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     if loc:
-        # --- SAFETY CHECK FOR GEOLOCATION ---
-# If browser location is not loaded yet, use Pune as default so it never crashes!
+        
 if loc and 'coords' in loc and loc['coords']:
     lat = loc['coords']['latitude']
     lon = loc['coords']['longitude']
@@ -59,7 +58,14 @@ else:
         lat, lon = 18.5204, 73.8567 # Default Pune
     
     soil_type = st.selectbox("Soil Type", ["Black Cotton Soil","Soft Clay","Alluvial","Sandy","Hard Rock","Granite Rock","Mixed","Rocky"])
-    project_type = st.selectbox("Project Type", ["Residential Housing","Commercial Building","Bridge / Road","Smart City District","Hospital","Industrial Facility"])
+    project_type = st.selectbox("Project Type", ["Residential Housing","Commercial Building","Bridge / Road","Smart Ci# Make sure this 'if' line touches the very left wall of your screen:
+if loc and 'coords' in loc and loc['coords']:
+    lat = loc['coords']['latitude']   # <-- Hit TAB once before typing this line
+    lon = loc['coords']['longitude']  # <-- Hit TAB once before typing this line
+else:                                 # <-- This line touches the left wall again
+    lat = 18.5204                     # <-- Hit TAB once before typing this line
+    lon = 73.8567                     # <-- Hit TAB once before typing this line
+ty District","Hospital","Industrial Facility"])
 
 with col2:
     # --- 4. SATELLITE HYBRID VISUALIZER (NEW) ---
