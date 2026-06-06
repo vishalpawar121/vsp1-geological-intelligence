@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 # --- PAGE CONFIG (MUST BE FIRST) ---
 st.set_page_config(
     page_title="VSP-1 Geological Intelligence",
-    page_icon="🌍",
+    page_icon="G",
     layout="wide"
 )
 
@@ -35,17 +35,17 @@ model = RandomForestClassifier(n_estimators=200, random_state=42)
 model.fit(X, y)
 
 # --- 2. SIDEBAR CONFIGURATION ---
-st.sidebar.header("📍 Site Configuration")
+st.sidebar.header("Site Configuration")
 
 location = st.sidebar.text_input("Location Name", value="Pune, Maharashtra")
 soil_types = ["Black Cotton Soil", "Soft Clay", "Alluvial", "Sandy", "Hard Rock", "Granite Rock", "Mixed", "Rocky"]
 selected_soil = st.sidebar.selectbox("Soil Type", soil_types, index=0)
 
 project_types = [
-    "Residential Housing",
+    "Residential Housing / Skyscrapers",
     "Smart City Districts",
-    "Bridge and Road Infrastructures",
-    "Hospital and Critical Care Facility",
+    "Bridge / Road Infrastructures",
+    "Hospital / Critical Care Facility",
     "Industrial Warehouse"
 ]
 selected_project = st.sidebar.selectbox("Project Type", project_types, index=0)
@@ -146,7 +146,7 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
     else:
         st.error(f"Status - {risk_label} | VSP Score: {score} | ML Confidence: {conf_pct}%")
 
-    # Structural recommendations
+    # Structural recommendations with robotic construction specifications
     depth = round(2.0 + water * 0.3, 1) if prediction == 0 else round(5.0 + water * 0.6, 1)
 
     result_col1, result_col2 = st.columns(2)
@@ -154,59 +154,56 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
     with result_col1:
         st.subheader("Site Geology Summary")
         st.info(f"""
-        * **Target Location:** {location}
-        * **Identified Strata:** {selected_soil}
-        * **Intended Use Case:** {selected_project}
+        Target Location: {location}
+        Identified Strata: {selected_soil}
+        Intended Use Case: {selected_project}
         """)
-        
+
     with result_col2:
-        st.subheader("Multihazard Safety and Structural Directive")
-        
-        # --- ULTIMATE SURVIVAL MATRIX: DYNAMIC STRUCTURAL LOGIC ---
-        if selected_project == "Residential Housing":
-            foundation = "Deep Friction Piles bypass expansive topsoil to reach hard bedrock"
-            seismic_tech = "Base Isolation Systems using heavy-duty laminate rubber and lead core bearings"
-            water_defense = "Elevated Plinth Beam Architecture with sub-surface French Drains"
-            wind_spec = "Symmetrical Concrete Shear Walls designed for twisting forces up to 140 km/h"
+        st.subheader("3D Geometric and Robotic Construction Directives")
+
+        # --- ROBOTIC CONSTRUCTION GEOMETRY MATRIX ---
+        if selected_project == "Residential Housing / Skyscrapers":
+            geometry_3d = "Concentric Hollow Hexagonal Prisms for optimal load distribution"
+            robot_toolpath = "Continuous spiral extrusion path to eliminate cold-joint structural weak points"
+            robotic_survival_mech = "Internal lattice voids for automated vertical reinforcement bar insertion"
             factor_safety = "1.5x Structural Safety Multiplier"
-            
+
         elif selected_project == "Smart City Districts":
-            foundation = "Integrated Raft and Micro-Pile Grid Network to distribute massive urban loads evenly"
-            seismic_tech = "Tuned Mass Dampers paired with flexible rubberized underground utility conduit loops"
-            water_defense = "Sponge-City Protocol using permeable concrete roads and automated storm sump gates"
-            wind_spec = "Aerodynamic Facade Geometry with curved corners to break up destructive wind vortices"
+            geometry_3d = "Voronoi Tessellation Structures to distribute macro urban mechanical stresses dynamically"
+            robot_toolpath = "Multi-axis robotic arm printing interlocking block grids with self-aligning joints"
+            robotic_survival_mech = "Dual-wall extrusion creating a fifty millimeter internal utility isolation cavity"
             factor_safety = "2.5x High Urban Resilience Multiplier"
-            
-        elif selected_project == "Bridge and Road Infrastructures":
-            foundation = "Cast-in-Situ Concrete Caissons Pier Foundations sunk deeply into riverbeds"
-            seismic_tech = "Seismic Dampeners and Expansion Decks allowing independent lane swaying without collapse"
-            water_defense = "Heavy Rip-Rap Armouring interlocking stones to prevent underwater pier scouring"
-            wind_spec = "Aerodynamic Box-Girder Decks acting like an inverted wing to stay pressed down and stable"
+
+        elif selected_project == "Bridge / Road Infrastructures":
+            geometry_3d = "Hyperbolic Paraboloids and Catenary Arches keeping concrete under pure compression"
+            robot_toolpath = "Spatial multi-dimensional printing along principal tension stress trajectories"
+            robotic_survival_mech = "Post-tensioned internal cable channels running directly through printed hollow sections"
             factor_safety = "2.2x Infrastructure Safety Multiplier"
-            
-        elif selected_project == "Hospital and Critical Care Facility":
-            foundation = "Heavy-Duty End-Bearing Piles with Extended Rock Sockets for zero settlement risk"
-            seismic_tech = "Active Mass Dampers and completely independent structural expansion joints between wings"
-            water_defense = "100-Year Flood Line Clearance keeping critical generators strictly on the first floor or higher"
-            wind_spec = "Category V Hurricane Armor Shell with missile-grade shatterproof structural glazing"
+
+        elif selected_project == "Hospital / Critical Care Facility":
+            geometry_3d = "Double-Curved Monolithic Geodesic Dome completely eliminating wall-to-roof seams"
+            robot_toolpath = "Spherical coordinate toolpath utilizing a central climbing gantry system"
+            robotic_survival_mech = "Interlocking triple-layer printed matrix filled with shock-absorbing polymers"
             factor_safety = "3.0x Maximum Critical Safety Multiplier"
-            
-        else: # Industrial Warehouse Default
-            foundation = "Isolated Spread Footings with Continuous Tie-Beams for heavy machinery vibration"
-            seismic_tech = "Ductile Cross-Braced Steel Framing layouts to absorb shockwaves"
-            water_defense = "Wide open perimeter catch-basins and high-volume gravity drainage outfalls"
-            wind_spec = "Heavy-Duty Anchor Bolt Base-Plates and roof up-lift protection brackets"
+
+        else:
+            geometry_3d = "Modular Rectangular Portal Frames with engineered structural ribbing layouts"
+            robot_toolpath = "Linear orthogonal layering with high-volume deposition print nozzles"
+            robotic_survival_mech = "Integrated base-plate anchor anchorages printed directly into footings"
             factor_safety = "1.8x Industrial Safety Multiplier"
 
-        # Displaying the safety requirements neatly to the client
+        # Display robotic construction specifications cleanly
         st.success(f"""
-        * **Recommended Foundation:** {foundation}
-        * **Earthquake and Seismic Shield:** {seismic_tech}
-        * **Flood and Water Defense:** {water_defense}
-        * **Wind Load Engineering:** {wind_spec}
-        * **Structural Safety Multiplier:** {factor_safety}
+        3D Geometric Modeling: {geometry_3d}
+
+        Robotic Toolpath Strategy: {robot_toolpath}
+
+        Robotic Survival Mechanism: {robotic_survival_mech}
+
+        Structural Safety Multiplier: {factor_safety}
         """)
-        
+
         # --- ENTERPRISE PDF GENERATION ENGINE ---
         st.markdown("---")
         st.subheader("Enterprise Deliverables")
@@ -218,11 +215,11 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
                 # Teal colored top header band
                 self.set_fill_color(0, 128, 128)
                 self.rect(0, 0, 210, 35, 'F')
-                
+
                 self.set_text_color(255, 255, 255)
                 self.set_font('Helvetica', 'B', 22)
                 self.cell(0, 10, 'VSP-1 GEOLOGICAL INTELLIGENCE SYSTEM', ln=True, align='L')
-                
+
                 self.set_font('Helvetica', 'I', 10)
                 self.cell(0, 5, 'Automated Engineering Feasibility Brief and Risk Matrix', ln=True, align='L')
                 self.ln(15)
@@ -249,12 +246,12 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
         # Metadata Section Table
         pdf.set_font('Helvetica', 'B', 11)
         pdf.set_fill_color(240, 242, 246)
-        
+
         # Row 1
         pdf.cell(45, 8, 'Target Location:', border=1, fill=True)
         pdf.set_font('Helvetica', '', 11)
         pdf.cell(135, 8, f'{location}', border=1, ln=True)
-        
+
         # Row 2
         pdf.set_font('Helvetica', 'B', 11)
         pdf.cell(45, 8, 'Identified Soil:', border=1, fill=True)
@@ -273,22 +270,21 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
         pdf.set_font('Helvetica', 'B', 11)
         pdf.set_text_color(200, 30, 30)
         pdf.cell(135, 8, f'{risk_label} (VSP Score: {score})', border=1, ln=True)
-        
+
         pdf.ln(8)
 
         # Structural Matrix Title
         pdf.set_text_color(33, 33, 33)
         pdf.set_font('Helvetica', 'B', 14)
-        pdf.cell(0, 10, 'Multihazard Engineering Specifications', ln=True)
+        pdf.cell(0, 10, '3D Geometric and Robotic Construction Specifications', ln=True)
         pdf.ln(2)
 
         # Engineering Spec Details blocks - CLEAN FOR PDF (NO EMOJIS)
         specs = [
-            ("Foundation Design", f"{foundation}"),
-            ("Seismic Shielding", seismic_tech),
-            ("Flood and Hydrological Defense", water_defense),
-            ("Wind Force Engineering", wind_spec),
-            ("Structural Safety Multiplier", factor_safety)
+            ("3D Geometric Modeling", f"{geometry_3d}"),
+            ("Robotic Toolpath Strategy", f"{robot_toolpath}"),
+            ("Robotic Survival Mechanism", f"{robotic_survival_mech}"),
+            ("Structural Safety Multiplier", f"{factor_safety}")
         ]
 
         for title, detail in specs:
