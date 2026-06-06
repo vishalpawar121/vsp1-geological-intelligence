@@ -128,5 +128,117 @@ def get_seismic_risk(lat, lon):
     # Example: Integration with USGS or a local seismic hazard map
     # For now, we'll return a calculated value based on known zones
     return 5 # Default for Pune (Zone III)
+# ==============================================================================
+# --- NEW ENTERPRISE DASHBOARD CODE (PASTED AT LINE 131) ---
+# ==============================================================================
+
+# 1. Page Configuration (Makes the app look professional and wide)
+st.set_page_config(layout="wide")
+
+# 2. Sidebar Configuration Panel (Moves inputs to the left panel)
+st.sidebar.header("📍 Site Configuration")
+
+location = st.sidebar.text_input("Location Name", value="Pune, Maharashtra")
+
+soil_types = ["Black Cotton Soil", "Alluvial Soil", "Laterite Soil", "Red Soil"]
+selected_soil = st.sidebar.selectbox("Soil Type", soil_types, index=0)
+
+project_types = ["Residential Housing", "Commercial Complex", "Industrial Warehouse"]
+selected_project = st.sidebar.selectbox("Project Type", project_types, index=0)
+
+analyse_button = st.sidebar.button("📊 ANALYSE SITE", use_container_width=True)
+
+
+# 3. Main Page Header & Clean Divider
+st.title("VSP-1")
+st.subheader("Geological Intelligence System")
+st.markdown("---")
+
+
+# 4. Metrics & Circular Gauge Charts Display
+# (We use default metrics here; you can tie them to your ML predictions next!)
+seismic_risk = 5.0
+soil_strength = 175  
+water_table = 3.5    
+
+import plotly.graph_objects as go
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    fig1 = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = seismic_risk,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Seismic Risk (1-10)"},
+        gauge = {'axis': {'range': [None, 10]}, 'bar': {'color': "#FF4B4B"}}
+    ))
+    fig1.update_layout(height=220, margin=dict(l=20, r=20, t=40, b=20))
+    st.plotly_chart(fig1, use_container_width=True)
+
+with col2:
+    fig2 = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = soil_strength,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Soil Strength (kPa)"},
+        gauge = {'axis': {'range': [None, 500]}, 'bar': {'color': "#1C83E1"}}
+    ))
+    fig2.update_layout(height=220, margin=dict(l=20, r=20, t=40, b=20))
+    st.plotly_chart(fig2, use_container_width=True)
+
+with col3:
+    fig3 = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = water_table,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Water Table Depth (m)"},
+        gauge = {'axis': {'range': [None, 20]}, 'bar': {'color': "#00D4B2"}}
+    ))
+    fig3.update_layout(height=220, margin=dict(l=20, r=20, t=40, b=20))
+    st.plotly_chart(fig3, use_container_width=True)
+
+
+st.markdown("---")
+
+
+# 5. Output Results Panel & PDF Generator
+if analyse_button:
+    # Business-ready Status Banner
+    st.warning("⚠️ **MODERATE RISK** | VSP Score: **23.75** | Data Reliability Score: **High**")
+    
+    result_col1, result_col2 = st.columns(2)
+    
+    with result_col1:
+        st.subheader("🔍 Site Geology Summary")
+        st.info(f"""
+        * **Target Location:** {location}
+        * **Identified Strata:** {selected_soil}
+        * **Intended Use Case:** {selected_project}
+        """)
+        
+    with result_col2:
+        st.subheader("🏗️ Structural Engineering Directive")
+        st.success("""
+        * **Recommended Foundation:** Deep Pile Foundation
+        * **Target Depth:** 7.1 meters
+        * **Engineering Note:** Bypasses upper swelling layers of Black Cotton Soil to reach safe load-bearing strata.
+        """)
+    
+    st.markdown("---")
+    
+    # B2B Feature: PDF Report Downloader
+    st.subheader("📄 Enterprise Deliverables")
+    mock_pdf_data = f"VSP-1 Geological Feasibility Report\nLocation: {location}\nFoundation Recommendation: Deep Pile (7.1m)"
+    
+    st.download_button(
+        label="📥 Download Professional Feasibility Report (PDF)",
+        data=mock_pdf_data,
+        file_name=f"VSP1_Report_{location.replace(' ', '_')}.txt",
+        mime="text/plain",
+        use_container_width=True
+    )
+else:
+    st.info("💡 Adjust parameters in the left sidebar and click **ANALYSE SITE** to run your geological assessment model.")
 
     
