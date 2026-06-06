@@ -307,29 +307,30 @@ Target Strata Depth: {depth} meters
         
         pdf.ln(8)
 
-        # Structural Matrix Title
-        pdf.set_text_color(33, 33, 33)
-        pdf.set_font('Helvetica', 'B', 14)
-        pdf.cell(0, 10, '🛡️ Multihazard Engineering Specifications', ln=True)
-        pdf.ln(2)
+        # # Structural Matrix Title
+pdf.set_text_color(33, 33, 33)
+pdf.set_font('Helvetica', 'B', 14)
+pdf.cell(0, 10, 'Multihazard Engineering Specifications', ln=True)
+pdf.ln(2)
 
-        # Engineering Spec Details blocks
-        specs = [
-            ("Foundation Design", f"{foundation} at target depth of {depth}m"),
-            ("Seismic Shielding", seismic_tech),
-            ("Flood/Hydrological Defense", water_defense),
-            ("Wind Force Engineering", wind_spec),
-            ("Structural Safety Multiplier", factor_safety)
-        ]
+# # Engineering Spec Details blocks
+specs = [
+    ("Foundation Design", f"{foundation} at target depth of {depth}m"),
+    ("Seismic Shielding", seismic_tech),
+    ("Flood/Hydrological Defense", water_defense),
+    ("Wind Force Engineering", wind_spec),
+    ("Structural Safety Multiplier", factor_safety)
+]
 
-        for title, detail in specs:
-            pdf.set_font('Helvetica', 'B', 11)
-            pdf.set_text_color(0, 102, 102)
-            pdf.cell(0, 6, f'• {title}', ln=True)
-            pdf.set_font('Helvetica', '', 11)
-            pdf.set_text_color(50, 50, 50)
-            pdf.multi_cell(0, 6, f'  {detail}')
-            pdf.ln(2)
+for title, detail in specs:
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(0, 102, 102)
+    pdf.cell(0, 6, f'- {title}', ln=True)  # Clean standard hyphen instead of bullet icon
+    pdf.set_font('Helvetica', '', 11)
+    pdf.set_text_color(50, 50, 50)
+    pdf.multi_cell(0, 6, f'  {detail}')
+    pdf.ln(2)
+    
 
         # Output the PDF as bytes
         pdf_bytes = pdf.output(dest='S').encode('latin-1')
