@@ -8,3 +8,4 @@ streamlit-js-eval
 requests
 fpdf
 plotly
+hashlib
