@@ -122,6 +122,14 @@ folium_static(m, height=300)
 # --- 6. ANALYSIS BUTTON & RESULTS ---
 st.markdown("---")
 
+# Initialize session state variables for self-evolution
+if 'telemetry_logs' not in st.session_state:
+    st.session_state.telemetry_logs = []
+if 'dynamic_safety_modifier' not in st.session_state:
+    st.session_state.dynamic_safety_modifier = 1.0
+if 'system_version' not in st.session_state:
+    st.session_state.system_version = 1.0
+
 if st.button("ANALYSE SITE", type="primary", use_container_width=True):
     # Get ML prediction
     prediction = model.predict([[seismic, strength, water]])[0]
@@ -148,182 +156,8 @@ if st.button("ANALYSE SITE", type="primary", use_container_width=True):
 
     # Structural recommendations with robotic construction specifications
     depth = round(2.0 + water * 0.3, 1) if prediction == 0 else round(5.0 + water * 0.6, 1)
+    foundation = "Deep Piling Foundation" if prediction >= 2 else "Shallow Spread Footing"
 
-    result_col1, result_col2 = st.columns(2)
-
-    with result_col1:
-        st.subheader("Site Geology Summary")
-        st.info(f"""
-        Target Location: {location}
-        Identified Strata: {selected_soil}
-        Intended Use Case: {selected_project}
-        """)
-
-    with result_col2:
-        st.subheader("3D Geometric and Robotic Construction Directives")
-
-        # --- ROBOTIC CONSTRUCTION GEOMETRY MATRIX ---
-        if selected_project == "Residential Housing / Skyscrapers":
-            geometry_3d = "Concentric Hollow Hexagonal Prisms for optimal load distribution"
-            robot_toolpath = "Continuous spiral extrusion path to eliminate cold-joint structural weak points"
-            robotic_survival_mech = "Internal lattice voids for automated vertical reinforcement bar insertion"
-            factor_safety = "1.5x Structural Safety Multiplier"
-
-        elif selected_project == "Smart City Districts":
-            geometry_3d = "Voronoi Tessellation Structures to distribute macro urban mechanical stresses dynamically"
-            robot_toolpath = "Multi-axis robotic arm printing interlocking block grids with self-aligning joints"
-            robotic_survival_mech = "Dual-wall extrusion creating a fifty millimeter internal utility isolation cavity"
-            factor_safety = "2.5x High Urban Resilience Multiplier"
-
-        elif selected_project == "Bridge / Road Infrastructures":
-            geometry_3d = "Hyperbolic Paraboloids and Catenary Arches keeping concrete under pure compression"
-            robot_toolpath = "Spatial multi-dimensional printing along principal tension stress trajectories"
-            robotic_survival_mech = "Post-tensioned internal cable channels running directly through printed hollow sections"
-            factor_safety = "2.2x Infrastructure Safety Multiplier"
-
-        elif selected_project == "Hospital / Critical Care Facility":
-            geometry_3d = "Double-Curved Monolithic Geodesic Dome completely eliminating wall-to-roof seams"
-            robot_toolpath = "Spherical coordinate toolpath utilizing a central climbing gantry system"
-            robotic_survival_mech = "Interlocking triple-layer printed matrix filled with shock-absorbing polymers"
-            factor_safety = "3.0x Maximum Critical Safety Multiplier"
-
-        else:
-            geometry_3d = "Modular Rectangular Portal Frames with engineered structural ribbing layouts"
-            robot_toolpath = "Linear orthogonal layering with high-volume deposition print nozzles"
-            robotic_survival_mech = "Integrated base-plate anchor anchorages printed directly into footings"
-            factor_safety = "1.8x Industrial Safety Multiplier"
-
-        # Display robotic construction specifications cleanly
-        st.success(f"""
-        3D Geometric Modeling: {geometry_3d}
-
-        Robotic Toolpath Strategy: {robot_toolpath}
-
-        Robotic Survival Mechanism: {robotic_survival_mech}
-
-        Structural Safety Multiplier: {factor_safety}
-        """)
-
-        # --- ENTERPRISE PDF GENERATION ENGINE ---
-        st.markdown("---")
-        st.subheader("Enterprise Deliverables")
-
-        from fpdf import FPDF
-
-        class VSP1Report(FPDF):
-            def header(self):
-                # Teal colored top header band
-                self.set_fill_color(0, 128, 128)
-                self.rect(0, 0, 210, 35, 'F')
-
-                self.set_text_color(255, 255, 255)
-                self.set_font('Helvetica', 'B', 22)
-                self.cell(0, 10, 'VSP-1 GEOLOGICAL INTELLIGENCE SYSTEM', ln=True, align='L')
-
-                self.set_font('Helvetica', 'I', 10)
-                self.cell(0, 5, 'Automated Engineering Feasibility Brief and Risk Matrix', ln=True, align='L')
-                self.ln(15)
-
-            def footer(self):
-                self.set_y(-15)
-                self.set_font('Helvetica', 'I', 8)
-                self.set_text_color(128, 128, 128)
-                self.cell(0, 10, f'Page {self.page_no()} | Generated Automatically by VSP-1 Core Engine', align='C')
-
-        # Initialize PDF Document
-        pdf = VSP1Report()
-        pdf.add_page()
-        pdf.set_margins(15, 20, 15)
-
-        # Title Block
-        pdf.set_text_color(33, 33, 33)
-        pdf.set_font('Helvetica', 'B', 16)
-        pdf.cell(0, 10, f'Geotechnical Assessment: {location}', ln=True)
-        pdf.set_draw_color(0, 128, 128)
-        pdf.line(15, 47, 195, 47)
-        pdf.ln(5)
-
-        # Metadata Section Table
-        pdf.set_font('Helvetica', 'B', 11)
-        pdf.set_fill_color(240, 242, 246)
-
-        # Row 1
-        pdf.cell(45, 8, 'Target Location:', border=1, fill=True)
-        pdf.set_font('Helvetica', '', 11)
-        pdf.cell(135, 8, f'{location}', border=1, ln=True)
-
-        # Row 2
-        pdf.set_font('Helvetica', 'B', 11)
-        pdf.cell(45, 8, 'Identified Soil:', border=1, fill=True)
-        pdf.set_font('Helvetica', '', 11)
-        pdf.cell(135, 8, f'{selected_soil}', border=1, ln=True)
-
-        # Row 3
-        pdf.set_font('Helvetica', 'B', 11)
-        pdf.cell(45, 8, 'Project Framework:', border=1, fill=True)
-        pdf.set_font('Helvetica', '', 11)
-        pdf.cell(135, 8, f'{selected_project}', border=1, ln=True)
-
-        # Row 4
-        pdf.set_font('Helvetica', 'B', 11)
-        pdf.cell(45, 8, 'Evaluated Risk:', border=1, fill=True)
-        pdf.set_font('Helvetica', 'B', 11)
-        pdf.set_text_color(200, 30, 30)
-        pdf.cell(135, 8, f'{risk_label} (VSP Score: {score})', border=1, ln=True)
-
-        pdf.ln(8)
-
-        # Structural Matrix Title
-        pdf.set_text_color(33, 33, 33)
-        pdf.set_font('Helvetica', 'B', 14)
-        pdf.cell(0, 10, '3D Geometric and Robotic Construction Specifications', ln=True)
-        pdf.ln(2)
-
-        # Engineering Spec Details blocks - CLEAN FOR PDF (NO EMOJIS)
-        specs = [
-            ("3D Geometric Modeling", f"{geometry_3d}"),
-            ("Robotic Toolpath Strategy", f"{robot_toolpath}"),
-            ("Robotic Survival Mechanism", f"{robotic_survival_mech}"),
-            ("Structural Safety Multiplier", f"{factor_safety}")
-        ]
-
-        for title, detail in specs:
-            pdf.set_font('Helvetica', 'B', 11)
-            pdf.set_text_color(0, 102, 102)
-            pdf.cell(0, 6, f'- {title}', ln=True)
-            pdf.set_font('Helvetica', '', 10)
-            pdf.set_text_color(50, 50, 50)
-            pdf.multi_cell(0, 5, f'{detail}')
-            pdf.ln(1)
-
-        # Output the PDF as bytes
-        pdf_bytes = pdf.output(dest='S').encode('latin-1')
-
-        # Clean, full-width Streamlit Download Button targeting the PDF binary
-        st.download_button(
-            label="Download Professional Feasibility Report PDF",
-            data=pdf_bytes,
-            file_name=f"VSP1_Geological_Report_{location.replace(' ', '_')}.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-
-else:
-    st.info("Adjust parameters in the left sidebar and click ANALYSE SITE to run your geological assessment model.")
-
-# --- 7. LIVE USGS MONITORING ---
-st.markdown("---")
-st.subheader("LIVE SEISMIC MONITORING - USGS")
-
-try:
-    url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson"
-    response = urllib.request.urlopen(url, timeout=5)
-    data = json.loads(response.read().decode())
-    st.write(f"Global earthquakes tracked: {len(data['features'])}")
-except Exception as e:
-    st.warning(f"Live data updating... (Error: {str(e)})")
-
-st.caption("VSP-1 Geological Intelligence System | Founded by Vishal Pawar | 2026")
     result_col1, result_col2 = st.columns(2)
 
     with result_col1:
@@ -334,14 +168,6 @@ st.caption("VSP-1 Geological Intelligence System | Founded by Vishal Pawar | 202
         * **Intended Use Case:** {selected_project}
         """)
         
-        # Initialize Self-Evolution States if they do not exist
-        if 'telemetry_logs' not in st.session_state:
-            st.session_state.telemetry_logs = []
-        if 'dynamic_safety_modifier' not in st.session_state:
-            st.session_state.dynamic_safety_modifier = 1.0
-        if 'system_version' not in st.session_state:
-            st.session_state.system_version = 1.0
-
         st.markdown("---")
         st.subheader("🌐 AI System Evolution Watchdog")
         st.caption(f"Active Core Engine State: v{st.session_state.system_version}")
@@ -373,7 +199,7 @@ st.caption("VSP-1 Geological Intelligence System | Founded by Vishal Pawar | 202
         st.subheader("🏗️ Multihazard Safety & Structural Directive")
         
         # --- COMPLETE INTERLOCKING MULTIHAZARD & ROBOTIC LOGIC ---
-        if selected_project == "Residential Housing":
+        if "Residential" in selected_project:
             seismic_tech = "Base Isolation System using heavy-duty laminate rubber and lead core bearings"
             water_defense = "Elevated Plinth Beam Architecture with sub-surface French Drains"
             wind_spec = "Symmetrical Concrete Shear Walls designed for twisting forces up to 140 km/h"
@@ -538,4 +364,17 @@ st.caption("VSP-1 Geological Intelligence System | Founded by Vishal Pawar | 202
     )
 else:
     st.info("Adjust parameters in the left sidebar and click ANALYSE SITE to run your assessment.")
-            
+
+# --- 7. LIVE USGS MONITORING ---
+st.markdown("---")
+st.subheader("LIVE SEISMIC MONITORING - USGS")
+
+try:
+    url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson"
+    response = urllib.request.urlopen(url, timeout=5)
+    data = json.loads(response.read().decode())
+    st.write(f"Global earthquakes tracked: {len(data['features'])}")
+except Exception as e:
+    st.warning(f"Live data updating... (Error: {str(e)})")
+
+st.caption("VSP-1 Geological Intelligence System | Founded by Vishal Pawar | 2026")
