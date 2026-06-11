@@ -732,3 +732,79 @@ else:
 
 st.markdown("---")
 st.caption("VSP-1 Self-Evolving Geological Intelligence System with Immutable Blockchain Audit Ledger | Founded by Vishal Pawar | Powered by RSI Architecture + Cryptographic Verification | 2026")
+# ==============================================================================
+# --- PHASE 8: GLOBAL MULTILINGUAL INTERNATIONALIZATION ENGINE ---
+# ==============================================================================
+st.sidebar.markdown("---")
+st.sidebar.subheader("🌐 Global Language Matrix")
+selected_lang = st.sidebar.selectbox(
+    "Select System Language",
+    ["English", "मराठी (Marathi)", "Español (Spanish)", "Deutsch (German)", "日本語 (Japanese)"]
+)
+
+# Core Translation Dictionary for Global UI Expansion
+lang_dict = {
+    "English": {
+        "title": "VSP-1 Geological Intelligence",
+        "subtitle": "Multihazard Safety and Robotic Structural Directive",
+        "loc": "Target Location",
+        "soil": "Identified Strata",
+        "project": "Intended Use Case",
+        "safety": "Structural Safety Multiplier",
+        "robotic_title": "Autonomous Robotic 3D Construction Parameters",
+        "geom": "Target 3D Geometry",
+        "path": "Robotic Toolpath Matrix",
+        "mitigation": "Robotic Mitigations"
+    },
+    "मराठी (Marathi)": {
+        "title": "व्हीएसपी-१ भौगोलिक बुद्धिमत्ता",
+        "subtitle": "बहुधोका सुरक्षा आणि रोबोटिक संरचनात्मक निर्देश",
+        "loc": "लक्ष्य ठिकाण",
+        "soil": "ओळखलेला मातीचा प्रकार",
+        "project": "नियोजित प्रकल्प",
+        "safety": "संरचनात्मक सुरक्षा गुणांक",
+        "robotic_title": "स्वायत्त रोबोटिक ३डी बांधकाम पॅरामीटर्स",
+        "geom": "लक्ष्य ३डी भूमिती",
+        "path": "रोबोटिक टूलपाथ मॅट्रिक्स",
+        "mitigation": "रोबोटिक उपाययोजना"
+    },
+    "Español (Spanish)": {
+        "title": "Inteligencia Geológica VSP-1",
+        "subtitle": "Directiva de Seguridad Multiriesgo y Estructura Robótica",
+        "loc": "Ubicación del Objetivo",
+        "soil": "Estratos Identificados",
+        "project": "Caso de Uso Previsto",
+        "safety": "Multiplicador de Seguridad Estructural",
+        "robotic_title": "Parámetros de Construcción 3D Robótica Autónoma",
+        "geom": "Geometría 3D Objetivo",
+        "path": "Matriz de Trayectoria Robótica",
+        "mitigation": "Mitigaciones Robóticas"
+    },
+    "Deutsch (German)": {
+        "title": "VSP-1 Geologische Intelligenz",
+        "subtitle": "Multi-Gefahren-Sicherheits- und Robotik-Strukturrichtlinie",
+        "loc": "Zielort",
+        "soil": "Identifizierte Bodenschicht",
+        "project": "Geplanter Anwendungsfall",
+        "safety": "Struktureller Sicherheitsmultiplikator",
+        "robotic_title": "Autonome Robotische 3D-Bauparameter",
+        "geom": "Ziel-3D-Geometrie",
+        "path": "Robotische Werkzeugweg-Matrix",
+        "mitigation": "Robotische Schadensminderung"
+    },
+    "日本語 (Japanese)": {
+        "title": "VSP-1 地質インテリジェンス",
+        "subtitle": "マルチハザード安全およびロボット構造指令",
+        "loc": "対象地域",
+        "soil": "特定された地層",
+        "project": "想定されるユースケース",
+        "safety": "構造安全係数倍率",
+        "robotic_title": "自律型ロボット3D建設パラメーター",
+        "geom": "対象3Dジオメトリ",
+        "path": "ロボットツールパス行列",
+        "mitigation": "ロボットによる緩和策"
+    }
+}
+
+# Fetch active dictionary translations based on user selection
+ui = lang_dict[selected_lang]
