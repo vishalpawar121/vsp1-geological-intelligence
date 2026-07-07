@@ -1094,7 +1094,7 @@ st.markdown("""
 
 st.markdown("""
 <div style='text-align: center; color: #6B7280; font-size: 0.9rem; margin-top: 1rem;'>
-    <p>🚀 VSP-1 v3.0 Enterprise Edition | All FREE • All Features • All Data | 2026</p>
-    <p>⚖️ <strong>Legal Disclaimer:</strong> This is analytical support only. Physical site inspections by certified engineers are mandatory.</p>
+<p style='letter-spacing: 1.5px; font-weight: 600; color: #4B5563;'>🌐 VSP-1 v3.0 | NEXT-GENERATION AUTONOMOUS INTELLIGENCE</p>
+<p>⚖️ <strong>Legal Disclaimer:</strong> This is analytical support only. Physical site inspections by certified engineers are mandatory.</p>
 </div>
 """, unsafe_allow_html=True)
