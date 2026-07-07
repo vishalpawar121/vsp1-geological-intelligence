@@ -836,30 +836,37 @@ with tab1:
 # ===== TAB 2: SOIL SCANNER =====
 with tab2:
     st.markdown("### 🔬 Soil Scanner <span class='free-badge'>FREE</span>", unsafe_allow_html=True)
+    
     col1, col2 = st.columns(2)
-    
     with col1:
-        moisture = st.slider("💧 Moisture (%)", 0.0, 60.0, 25.0)
+        moisture_scanner = st.slider("💧 Moisture (%)", 0.0, 100.0, 25.0, key="moisture_scanner")
         color = st.selectbox("🎨 Color", ["Black", "Red", "Yellow", "Brown", "Gray"])
-        ph = st.slider("pH", 4.0, 9.0, 6.8)
-    
+        ph_scanner = st.slider("pH Level", 0.0, 14.0, 6.5, key="ph_scanner")
     with col2:
-        npk_n = st.slider("Nitrogen (%)", 0.0, 5.0, 1.2)
-        npk_p = st.slider("Phosphorus (%)", 0.0, 2.0, 0.5)
-        npk_k = st.slider("Potassium (%)", 0.0, 50.0, 20.0)
-    
+        npk_n_scanner = st.slider("Nitrogen (%)", 0.0, 5.0, 1.2, key="nitrogen_scanner")
+        npk_p_scanner = st.slider("Phosphorus (%)", 0.0, 5.0, 1.2, key="phosphorus_scanner")
+        npk_k_scanner = st.slider("Potassium (%)", 0.0, 5.0, 1.2, key="potassium_scanner")
+
     if st.button("🔬 ANALYZE", type="primary", use_container_width=True):
-        scan = st.session_state.soil_scanner.analyze_soil_properties(moisture, color, ph, npk_n, npk_p, npk_k)
+        # Pass the new _scanner variables into your analysis function
+        scan = st.session_state.soil_scanner.analyze_soil_properties(moisture_scanner, color, ph_scanner, npk_n_scanner, npk_p_scanner, npk_k_scanner)
         
         fig = go.Figure(go.Indicator(
             mode="gauge+number",
             value=scan['quality_score'],
             title={'text': "Soil Quality"},
-            gauge={'axis': {'range': [0, 100]}, 'bar': {'color': "#10B981"}, 'steps': [{'range': [0, 50], 'color': "#FEE2E2"}, {'range': [50, 70], 'color': "#FEF3C7"}, {'range': [70, 100], 'color': "#ECFDF5"}]}
+            gauge={
+                'axis': {'range': [0, 100]},
+                'bar': {'color': "#10B981"},
+                'steps': [
+                    {'range': [0, 50], 'color': "#FEE2E2"},
+                    {'range': [50, 70], 'color': "#FEF3C7"},
+                    {'range': [70, 100], 'color': "#ECFDF5"}
+                ]}
         ))
         fig.update_layout(height=300)
         st.plotly_chart(fig, use_container_width=True)
-        
+
         col_m1, col_m2, col_m3 = st.columns(3)
         with col_m1:
             st.metric("Type", scan['soil_type'])
@@ -970,18 +977,23 @@ with tab5:
 with tab6:
     st.markdown("### 🎯 Crop Feasibility <span class='free-badge'>FREE</span>", unsafe_allow_html=True)
     
-    ph_crop = st.slider("pH Level", 4.0, 9.0, 6.8)
-    moisture_crop = st.slider("Moisture (%)", 0.0, 60.0, 25.0)
+    ph_crop = st.slider("pH Level", 0.0, 14.0, 6.5, key="ph_crop")
+    moisture_crop = st.slider("Moisture (%)", 0.0, 100.0, 25.0, key="moisture_crop")
     water_avail = st.selectbox("Water", ["Low", "Medium", "High"])
-    npk_n_crop = st.slider("Nitrogen (%)", 0.0, 5.0, 1.2)
     
+    npk_n_crop = st.slider("Nitrogen (%)", 0.0, 5.0, 1.2, key="nitrogen_crop")
+    npk_p_crop = st.slider("Phosphorus (%)", 0.0, 5.0, 1.2, key="phosphorus_crop")
+    npk_k_crop = st.slider("Potassium (%)", 0.0, 5.0, 1.2, key="potassium_crop")
+
     if st.button("📊 Calculate", type="primary", use_container_width=True):
+        # Note: Your calculate_crop_score currently only takes Nitrogen. 
+        # If you update that backend function to use P and K, add them here!
         scores = st.session_state.crop_analyzer.calculate_crop_score(selected_soil, ph_crop, moisture_crop, npk_n_crop, water_avail)
         
         fig = go.Figure(data=[go.Bar(x=list(scores.keys()), y=list(scores.values()), marker_color='#10B981')])
         fig.update_layout(title="Crop Scores", yaxis_title="Score (0-100)", height=400)
         st.plotly_chart(fig, use_container_width=True)
-        
+
         crop_df = pd.DataFrame({"Crop": list(scores.keys()), "Score": list(scores.values())})
         st.dataframe(crop_df, use_container_width=True, hide_index=True)
 
