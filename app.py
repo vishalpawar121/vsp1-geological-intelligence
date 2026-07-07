@@ -1038,16 +1038,9 @@ with tab8:
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; background: #ECFDF5; border: 1px solid #10B981; border-radius: 12px; padding: 1.5rem; margin-top: 2rem;'>
-    <h4 style='color: #10B981; margin-top: 0;'>✨ VSP-1 v3.0 | 100% FREE Edition</h4>
-    <p style='color: #047857;'>
-        ✅ Live Weather Data (Open-Meteo)<br>
-        ✅ Location Analysis (OpenStreetMap)<br>
-        ✅ Elevation Data (Open-Elevation)<br>
-        ✅ Satellite Availability (USGS/Sentinel/Copernicus)<br>
-        ✅ Soil Analysis • Crop Scoring • Blockchain • Reports<br>
-        <strong>💰 $0.00 - No API Keys • No Subscriptions • No Costs</strong>
-    </p>
+<div style='text-align: center; color: #6B7280; margin-top: 2rem; padding: 1rem;'>
+    <p style='font-size: 1.1rem; font-weight: 600; color: #1F2937;'>VSP-1 Geological Intelligence</p>
+    <p style='font-size: 0.9rem;'>Enterprise Data Analytics & Geospatial Engine | 2026</p>
 </div>
 """, unsafe_allow_html=True)
 
