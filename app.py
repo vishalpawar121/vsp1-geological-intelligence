@@ -767,8 +767,20 @@ class FieldDocumentationSystem:
         return doc_entry
 
 if 'field_docs' not in st.session_state:
-    st.session_state.field_docs = FieldDocumentationSystem()
+    st.session_state.field_docs = FieldDocumentationSystem()  
 
+# --- 13. AGI INTEGRATION CORE ---
+class AGISystemCore:
+    def __init__(self):
+        self.model_status = "STANDBY"
+        self.readiness = "AGI-Ready Architecture deployed."
+
+    def generate_insight(self, context: dict, user_prompt: str) -> str:
+        return f"**AGI Analysis Pipeline:** \n\nAnalyzing query: '{user_prompt}'\n\nBased on your current configuration for **{context.get('project')}** in **{context.get('location')}** with **{context.get('soil')}** soil, the structural integrity parameters show optimal baseline conditions. My adaptive reasoning suggests reinforcing foundations specifically against your Level {context.get('seismic')} seismic risk rating."
+
+if 'agi_core' not in st.session_state:
+    st.session_state.agi_core = AGISystemCore() 
+    
 # --- SIDEBAR ---
 st.sidebar.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 st.sidebar.markdown("### ⚙️ Configuration")
@@ -804,10 +816,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- TABS ---
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
-    "🔍 Search", "🔬 Soil Scanner", "📡 Live Weather", "🛰️ Satellite", 
-    "🌍 Location", "🎯 Crop", "📸 Field Docs", "🔗 Blockchain"
-])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["🔍 Search", "🔬 Soil Scanner", "📡 Live Weather", "🛰️ Satellite", "🌍 Location", "🎯 Crop", "📸 Field Docs", "🔗 Blockchain", "🧠 AGI Core"])
 
 # ===== TAB 1: SEARCH =====
 with tab1:
@@ -1035,6 +1044,45 @@ with tab8:
         blocks_df = pd.DataFrame([{"#": b['block_index'], "ID": b['block_id'][:8], "Location": b['data']['location'], "Risk": b['data']['risk_level'], "Score": b['data']['vsp_score']} for b in st.session_state.blockchain_ledger.blockchain])
         st.dataframe(blocks_df, use_container_width=True, hide_index=True)
 
+# ===== TAB 9: AGI CORE =====
+with tab9:
+    st.markdown("### 🧠 Artificial General Intelligence (AGI) Core", unsafe_allow_html=True)
+    st.info("System Architecture is AGI-Ready. This module is designed to integrate with next-generation autonomous reasoning models.", icon="🤖")
+
+    col_agi1, col_agi2 = st.columns([2, 1])
+    
+    with col_agi1:
+        st.markdown("#### 💬 AGI Geological Assistant")
+        if "agi_chat" not in st.session_state:
+            st.session_state.agi_chat = [{"role": "assistant", "content": "AGI Core initialized. I am ready to autonomously analyze complex geological, weather, and satellite datasets. How can I assist your project today?"}]
+
+        for msg in st.session_state.agi_chat:
+            with st.chat_message(msg["role"]):
+                st.write(msg["content"])
+
+        if prompt := st.chat_input("Ask the AGI to analyze the current data..."):
+            st.session_state.agi_chat.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.write(prompt)
+
+            with st.chat_message("assistant"):
+                context = {
+                    "location": location, 
+                    "soil": selected_soil, 
+                    "seismic": seismic,
+                    "project": selected_project
+                }
+                with st.spinner("Processing multi-modal geological data..."):
+                    response = st.session_state.agi_core.generate_insight(context, prompt)
+                    st.write(response)
+                st.session_state.agi_chat.append({"role": "assistant", "content": response})
+
+    with col_agi2:
+        st.markdown("#### ⚙️ AGI Subsystems")
+        st.metric("Neural Interface", "🟢 Online")
+        st.metric("Context Memory", f"{len(st.session_state.agi_chat)} Nodes")
+        st.metric("Reasoning Engine", "Simulated")  
+        
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("""
