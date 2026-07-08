@@ -785,7 +785,7 @@ class AGISystemCore:
             return "⚠️ API Key not found in Streamlit Secrets. Please check your vault."
         
         # Connects directly to Google's supercomputers
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.api_key}"
         
         # The tactical instructions for your AI
         system_prompt = f"You are VSP-1, an elite enterprise Geological Intelligence AI. You provide strict, professional, highly analytical advice. Current Context: Location: {context.get('location')}, Soil Type: {context.get('soil')}, Project: {context.get('project')}, Seismic Risk Level: {context.get('seismic')}/10. Analyze the user's query."
