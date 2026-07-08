@@ -797,7 +797,7 @@ strength = st.sidebar.slider("💪 Soil Strength (kPa)", 80, 500, 175)
 water = st.sidebar.slider("💧 Water Table (m)", 0.5, 10.0, 3.5)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔗 FREE API Status")
+st.sidebar.markdown("### 🔗 Core API Status")
 col_api1, col_api2 = st.sidebar.columns(2)
 with col_api1:
     st.metric("Weather", "🟢 Live")
@@ -810,8 +810,8 @@ with col_api2:
 st.markdown("""
 <div style='text-align: center; margin-bottom: 2rem;'>
     <h1 style='margin-bottom: 0.5rem;'>🧬 VSP-1 Geological Intelligence</h1>
-    <p style='font-size: 1.1rem; color: #6B7280; margin: 0;'>✨ 100% FREE Enterprise AI System</p>
-    <p style='font-size: 0.95rem; color: #10B981; margin-top: 0.25rem;'>All Features • All Data • Zero Cost</p>
+    <p style='font-size: 1.1rem; color: #6B7280; margin: 0;'>✨ Next-Generation AI Architecture</p>
+<p style='font-size: 0.95rem; color: #10B981; margin-top: 0.25rem;'>Enterprise-Grade Analysis • Real-Time Geospatial Processing</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -820,7 +820,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["🔍 Search", "
 
 # ===== TAB 1: SEARCH =====
 with tab1:
-    st.markdown("### 🔍 Geological Database Search <span class='free-badge'>FREE</span>", unsafe_allow_html=True)
+    st.markdown("### 🔍 Geological Database Search", unsafe_allow_html=True)
     col1, col2 = st.columns([4, 1])
     with col1:
         search_query = st.text_input("Search...", placeholder="Enter soil type", key="search_input")
