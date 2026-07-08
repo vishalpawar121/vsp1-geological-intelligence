@@ -772,14 +772,39 @@ if 'field_docs' not in st.session_state:
 # --- 13. AGI INTEGRATION CORE ---
 class AGISystemCore:
     def __init__(self):
-        self.model_status = "STANDBY"
-        self.readiness = "AGI-Ready Architecture deployed."
+        self.model_status = "ONLINE"
+        self.readiness = "Gemini AGI-Core Active."
+        try:
+            # Securely fetches the hidden key from your Streamlit vault
+            self.api_key = st.secrets["GEMINI_API_KEY"]
+        except:
+            self.api_key = None
 
     def generate_insight(self, context: dict, user_prompt: str) -> str:
-        return f"**AGI Analysis Pipeline:** \n\nAnalyzing query: '{user_prompt}'\n\nBased on your current configuration for **{context.get('project')}** in **{context.get('location')}** with **{context.get('soil')}** soil, the structural integrity parameters show optimal baseline conditions. My adaptive reasoning suggests reinforcing foundations specifically against your Level {context.get('seismic')} seismic risk rating."
+        if not self.api_key:
+            return "⚠️ API Key not found in Streamlit Secrets. Please check your vault."
+        
+        # Connects directly to Google's supercomputers
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.api_key}"
+        
+        # The tactical instructions for your AI
+        system_prompt = f"You are VSP-1, an elite enterprise Geological Intelligence AI. You provide strict, professional, highly analytical advice. Current Context: Location: {context.get('location')}, Soil Type: {context.get('soil')}, Project: {context.get('project')}, Seismic Risk Level: {context.get('seismic')}/10. Analyze the user's query."
+        
+        payload = {
+            "contents": [{"parts": [{"text": system_prompt + "\n\nUser Query: " + user_prompt}]}]
+        }
+        
+        try:
+            response = requests.post(url, json=payload, headers={'Content-Type': 'application/json'})
+            if response.status_code == 200:
+                return response.json()['candidates'][0]['content']['parts'][0]['text']
+            else:
+                return f"⚠️ System Overload. Engine response: {response.status_code}"
+        except Exception as e:
+            return f"⚠️ Network failure: {str(e)}"
 
 if 'agi_core' not in st.session_state:
-    st.session_state.agi_core = AGISystemCore() 
+    st.session_state.agi_core = AGISystemCore()
     
 # --- SIDEBAR ---
 st.sidebar.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
