@@ -935,13 +935,20 @@ with tab4:
     
     with col1:
         if st.button("📡 USGS Landsat", use_container_width=True):
-            usgs = st.session_state.remote_sensing.fetch_usgs_data()
-            st.json({
-                "Satellite": usgs['satellite'],
-                "Resolution": f"{usgs['resolution_m']}m",
-                "Cloud Cover": usgs['cloud_cover'],
-                "URL": usgs['data_url']
-            })
+        # Safely fetch USGS data only if the module is initialized
+            if "remote_sensing" in st.session_state and hasattr(st.session_state.remote_sensing, 'fetch_usgs_data'):
+                usgs = st.session_state.remote_sensing.fetch_usgs_data()
+            else:
+                usgs = None
+                st.warning("⚠️ Remote sensing module is not initialized yet. Data unavailable.")
+                
+            if usgs:
+                st.json({
+                    "Satellite": usgs['satellite'],
+                    "Resolution": f"{usgs['resolution_m']}m",
+                    "Cloud Cover": usgs['cloud_cover'],
+                    "URL": usgs['data_url']
+                })
     
     with col2:
         if st.button("🛰️ Sentinel-2", use_container_width=True):
@@ -1006,6 +1013,84 @@ with tab5:
         with col_t2:
             st.metric("Slope Class", slope['slope_class'])
             st.write(f"**Slope:** {slope['slope']:.1f}°")
+            
+      # --- NEW FEATURE: TECTONIC & 3D STRUCTURAL SUGGESTIONS ---
+        st.markdown("---")
+        st.markdown("### 🌋 Tectonic Risk & 3D Structure Generator")
+        
+        # User inputs the location
+        analysis_location = st.text_input("Enter Location for Seismic Structural Analysis", value="Pune, Maharashtra")
+        
+        if st.button("🏗️ Analyze & Suggest Structure", use_container_width=True):
+            st.info(f"Analyzing tectonic history for: {analysis_location}...")
+            
+            # Simulated VSP-1 AI Logic
+            if "Pune" in analysis_location or "Maharashtra" in analysis_location:
+                plate_info = "Deccan Plateau (Stable Basalt Shield)"
+                seismic_risk = "Moderate (Zone III)"
+                suggested_shape = "🔺 Pyramidal / Wide-Base Triangle"
+                reasoning = "A wider base lowers the center of gravity. Triangular frames distribute lateral seismic waves efficiently."
+            else:
+                plate_info = "High-Risk Active Fault Line"
+                seismic_risk = "Severe (Zone IV / V)"
+                suggested_shape = "⬡ Geodesic Dome / Hexagonal Base"
+                reasoning = "Curved structures dissipate shockwaves evenly across the surface. Deep base isolation recommended."
+
+            # Display the AI Suggestion
+            st.success(f"**Recommended AI Shape:** {suggested_shape}")
+            st.write(f"**Geological Context:** {plate_info} | Risk: {seismic_risk}")
+            st.write(f"**Engineering Logic:** {reasoning}")
+            
+            # --- 3D DESIGN INTEGRATION (ACTIVE) ---
+            st.markdown("---")
+            st.write("#### 🧊 3D Blueprint Generation")
+            
+            # The button is now LIVE
+            if st.button("🚀 Launch 3D Modeler", use_container_width=True):
+                import numpy as np
+                import plotly.graph_objects as go
+                
+                st.success("Rendering interactive 3D model...")
+                
+                if "Pyramidal" in suggested_shape:
+                    # Mathematics for a 3D Pyramid
+                    fig = go.Figure(data=[
+                        go.Mesh3d(
+                            x=[-1, 1, 1, -1, 0], # Base corners and Apex X
+                            y=[-1, -1, 1, 1, 0], # Base corners and Apex Y
+                            z=[0, 0, 0, 0, 2],   # Flat base (z=0) and Height (z=2)
+                            i=[0, 1, 2, 3, 0, 0], # Triangle face indices
+                            j=[1, 2, 3, 0, 1, 2],
+                            k=[4, 4, 4, 4, 2, 3],
+                            color='#ff7f0e', # Safety Orange
+                            opacity=0.8,
+                            flatshading=True
+                        )
+                    ])
+                    fig.update_layout(
+                        title="Interactive 3D Blueprint: Pyramidal Base", 
+                        margin=dict(l=0, r=0, b=0, t=40),
+                        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                else:
+                    # Mathematics for a 3D Geodesic Dome (Half-Sphere)
+                    u = np.linspace(0, 2 * np.pi, 20)
+                    v = np.linspace(0, np.pi / 2, 20) 
+                    x = np.outer(np.cos(u), np.sin(v)).flatten()
+                    y = np.outer(np.sin(u), np.sin(v)).flatten()
+                    z = np.outer(np.ones(np.size(u)), np.cos(v)).flatten()
+                    
+                    fig = go.Figure(data=[
+                        go.Mesh3d(x=x, y=y, z=z, color='#1f77b4', opacity=0.7, alphahull=0)
+                    ])
+                    fig.update_layout(
+                        title="Interactive 3D Blueprint: Geodesic Dome", 
+                        margin=dict(l=0, r=0, b=0, t=40),
+                        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+                    )
+                    st.plotly_chart(fig, use_container_width=True)     
 
 # ===== TAB 6: CROP ANALYSIS =====
 with tab6:
