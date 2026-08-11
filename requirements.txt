@@ -9,3 +9,4 @@ requests
 fpdf
 plotly
 babel
+google-genai
