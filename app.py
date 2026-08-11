@@ -91,6 +91,40 @@ with tab1:
         ])
         st.dataframe(df)
 
+    # --- AGI ASSISTANT SNIPPET (added) ---
+    st.markdown("---")
+    st.subheader("🧠 AGI Assistant")
+
+    agi_prompt = st.text_area(
+        "Ask VSP-1 AGI (use geological questions, include context)",
+        height=150,
+        key="agi_prompt",
+    )
+
+    if st.button("Ask AGI"):
+        # Basic readiness checks
+        if "agi_core" not in st.session_state or st.session_state.agi_core.client is None:
+            st.warning(
+                "AGI not configured. Ensure `google-genai` is installed (requirements.txt) "
+                "and add GEMINI_API_KEY to Streamlit secrets."
+            )
+        elif not agi_prompt or not agi_prompt.strip():
+            st.info("Please enter a question for the AGI.")
+        else:
+            with st.spinner("Contacting VSP-1 AGI..."):
+                context = {
+                    "location": location,
+                    "soil": selected_soil,
+                    "project": selected_project,
+                    "seismic": seismic,
+                }
+                try:
+                    response = st.session_state.agi_core.generate_insight(context, agi_prompt)
+                    st.markdown("**AGI Response:**")
+                    st.write(response)
+                except Exception as e:
+                    st.error(f"AGI request failed: {e}")
+
 # Tab: Soil Scanner
 with tab2:
     st.header("🔬 Soil Scanner")
