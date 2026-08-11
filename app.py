@@ -5,6 +5,14 @@ import requests
 import plotly.express as px
 from datetime import datetime
 
+# Optional GenAI SDK imports (wrapped so the app still runs without the package)
+try:
+    from google import genai
+    from google.genai import types
+except Exception:
+    genai = None
+    types = None
+
 # --- PAGE CONFIG (MUST BE FIRST) ---
 st.set_page_config(
     page_title="VSP-1 Geological Intelligence | Enterprise AI System",
@@ -148,6 +156,63 @@ with tab9:
         st.success("Gemini API Key configured in secrets")
     else:
         st.warning("Gemini API Key not found in st.secrets. Add it to enable AGI features.")
+
+# --- 13. AGI INTEGRATION CORE ---
+class AGISystemCore:
+    def __init__(self):
+        self.model_status = "ONLINE"
+        self.readiness = "Gemini AGI-Core Active (gemini-3.6-flash)"
+        self.api_key = None
+        self.client = None
+        try:
+            # Securely fetch the hidden key from your Streamlit vault
+            self.api_key = st.secrets["GEMINI_API_KEY"]
+            if genai is None:
+                # SDK not available in environment
+                raise RuntimeError("google-genai SDK not installed")
+            self.client = genai.Client(api_key=self.api_key)
+        except Exception:
+            # Leave client as None if anything goes wrong; UI will show a helpful message
+            self.api_key = None
+            self.client = None
+
+    def generate_insight(self, context: dict, user_prompt: str) -> str:
+        if not self.client:
+            return "⚠️ API Key not found or Client failed to initialize. Please check your Streamlit vault."
+        
+        # The AGI instructions: Granting it vast world knowledge while keeping it professional
+        system_instruction = (
+            "You are VSP-1, an elite enterprise Geological Intelligence AGI (Artificial General Intelligence). "
+            "You possess vast knowledge about everything around the world. "
+            "You provide strict, professional, highly analytical advice based on global context and geotechnical data."
+        )
+        
+        prompt = f"Current Context: {context}\n\nUser Query: {user_prompt}"
+        
+        try:
+            # Connects to Google's latest frontier model via the modern SDK
+            response = self.client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.3, # Keeps it highly analytical and grounded
+                )
+            )
+            # `response` object shape can vary between SDK versions; attempt to read `text` then `response.output[0].content`
+            try:
+                return response.text
+            except Exception:
+                try:
+                    return str(response.output[0].content[0].text)
+                except Exception:
+                    return str(response)
+        except Exception as e:
+            return f"⚠️ AGI Network failure: {str(e)}"
+
+# Ensure AGI core is available in the Streamlit session state
+if 'agi_core' not in st.session_state:
+    st.session_state.agi_core = AGISystemCore()
 
 # --- FOOTER ---
 st.markdown("---")
