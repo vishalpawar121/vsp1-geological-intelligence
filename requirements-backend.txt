@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+celery[redis]
+httpx
+sse-starlette
+pydantic
+redis
+google-genai
+tenacity
+googletrans==4.0.0-rc1

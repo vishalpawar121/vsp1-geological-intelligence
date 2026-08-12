@@ -1,253 +1,256 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
+"""
+Updated Streamlit frontend (app.py)
+
+- Expects backend to return both original AI output and server-side Marathi translation.
+- Displays English summary and Marathi summary if available.
+- Uses @st.cache_data for elevation caching.
+- Non-blocking SSE/polling is preserved (SSE optional).
+"""
+import os
+import time
+import threading
+import json
+from typing import Optional
+
 import requests
-import plotly.express as px
-from datetime import datetime
+import streamlit as st
+from pydantic import BaseModel, Field, ValidationError
 
-# Optional GenAI SDK imports (wrapped so the app still runs without the package)
+# Optional SSE client for streaming events
 try:
-    from google import genai
-    from google.genai import types
+    from sseclient import SSEClient
 except Exception:
-    genai = None
-    types = None
+    SSEClient = None
 
-# --- PAGE CONFIG (MUST BE FIRST) ---
-st.set_page_config(
-    page_title="VSP-1 Geological Intelligence | Enterprise AI System",
-    page_icon="🧬",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+BACKEND_URL = os.environ.get("STREAMLIT_BACKEND_URL", "http://localhost:8000")
 
-# --- SIMPLE STYLING ---
-st.markdown(
-    """
-    <style>
-    .stApp { background: linear-gradient(180deg, #F9FAFB 0%, #F3F4F6 100%); }
-    h1 { color: #1F2937; }
-    .header-sub { color: #6B7280; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+# Simple i18n: added Marathi ('mr') display labels
+I18N = {
+    "en": {
+        "title": "VSP-1 Geological Intelligence — Global Chat",
+        "input_placeholder": "Ask a geological question (e.g., bearing capacity, risk assessment)...",
+        "start": "Send",
+        "starting_analysis": "Starting analysis...",
+        "no_backend": "Backend unreachable; try local quick summary.",
+        "local_summary": "Quick local summary",
+    },
+    "mr": {
+        "title": "VSP-1 भूगर्भीय बुद्धिमत्ता — ग्लोबल चॅट",
+        "input_placeholder": "भू-वैज्ञानिक प्रश्न विचारा...",
+        "start": "पाठवा",
+        "starting_analysis": "विश्लेषण सुरू केले जात आहे...",
+        "no_backend": "बॅकएंड उपलब्ध नाही; स्थानिक संक्षेप वापरून पहा.",
+        "local_summary": "त्वरीत स्थानिक सारांश",
+    },
+}
 
-# --- MAIN HEADER ---
-st.markdown(
-    """
-    <div style='text-align:center; margin-bottom: 1.5rem;'>
-        <h1>🧬 VSP-1 Geological Intelligence</h1>
-        <div class='header-sub'>Enterprise-Grade Analysis • Real-Time Geospatial Processing</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+# Client-side guardrails
+class ClientGuardrails(BaseModel):
+    lat: float = Field(..., ge=-90.0, le=90.0)
+    lon: float = Field(..., ge=-180.0, le=180.0)
+    message: str = Field(..., min_length=1, max_length=1600)
 
-# --- SIDEBAR CONFIGURATION ---
-st.sidebar.markdown("### ⚙️ Configuration")
-location = st.sidebar.text_input("📍 Location", value="Pune, Maharashtra")
-soil_types = ["Black Cotton", "Soft Clay", "Alluvial", "Sandy", "Hard Rock"]
-selected_soil = st.sidebar.selectbox("🌍 Soil Type", soil_types)
-project_types = ["Residential", "Smart City", "Bridge", "Hospital", "Industrial"]
-selected_project = st.sidebar.selectbox("🏗️ Project Type", project_types)
-seismic = st.sidebar.slider("📊 Seismic Risk", 1, 10, 5)
+    @staticmethod
+    def check_forbidden(message: str):
+        forbidden = ["invent", "make up", "hallucinate", "fabricate", "guess"]
+        low = message.lower()
+        for p in forbidden:
+            if p in low:
+                raise ValueError("Message contains forbidden phrasing; please reword.")
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔗 Core API Status")
-col1, col2 = st.sidebar.columns(2)
-with col1:
-    st.metric("Weather", "🟢 Live")
-    st.metric("Geo Data", "🟢 Live")
-with col2:
-    st.metric("Map Data", "🟢 Live")
-    st.metric("Elevation", "🟢 Live")
+# Cached geospatial call
+@st.cache_data(ttl=60 * 60)
+def cached_elevation(lat: float, lon: float) -> dict:
+    try:
+        r = requests.get(f"https://api.open-elevation.com/api/v1/lookup?locations={lat},{lon}", timeout=6)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        return {"error": f"Elevation fetch failed: {e}"}
 
-# --- TABS ---
-TAB_LABELS = [
-    "🔍 Search",
-    "🔬 Soil Scanner",
-    "📡 Live Weather",
-    "🛰️ Satellite",
-    "🌍 Location",
-    "🎯 Crop",
-    "📸 Field Docs",
-    "🔗 Blockchain",
-    "⚙️ Settings",
-]
+# Backend helpers
+def start_backend_conversation(lat: float, lon: float, message: str, ui_language: str) -> Optional[str]:
+    payload = {"lat": lat, "lon": lon, "user_message": message, "ui_language": ui_language}
+    try:
+        r = requests.post(f"{BACKEND_URL}/start_conversation", json=payload, timeout=10)
+        r.raise_for_status()
+        return r.json().get("task_id")
+    except Exception as e:
+        st.error(f"Failed to reach backend: {e}")
+        return None
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(TAB_LABELS)
+def fetch_task_once(task_id: str) -> dict:
+    try:
+        r = requests.get(f"{BACKEND_URL}/task/{task_id}", timeout=6)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        return {"error": str(e)}
 
-# Tab: Search
-with tab1:
-    st.header("🔍 Search")
-    q = st.text_input("Enter query to search geological knowledge base")
-    if q:
-        st.info(f"Searching for: {q}")
-        # Placeholder: show dummy results
-        df = pd.DataFrame([
-            {"Name": "Black Cotton", "Suitability": "Residential", "Notes": "Expansive clay"},
-            {"Name": "Alluvial", "Suitability": "All Projects", "Notes": "Good bearing capacity"},
-        ])
-        st.dataframe(df)
-
-    # --- AGI ASSISTANT SNIPPET (added) ---
-    st.markdown("---")
-    st.subheader("🧠 AGI Assistant")
-
-    agi_prompt = st.text_area(
-        "Ask VSP-1 AGI (use geological questions, include context)",
-        height=150,
-        key="agi_prompt",
-    )
-
-    if st.button("Ask AGI"):
-        # Basic readiness checks
-        if "agi_core" not in st.session_state or st.session_state.agi_core.client is None:
-            st.warning(
-                "AGI not configured. Ensure `google-genai` is installed (requirements.txt) "
-                "and add GEMINI_API_KEY to Streamlit secrets."
-            )
-        elif not agi_prompt or not agi_prompt.strip():
-            st.info("Please enter a question for the AGI.")
-        else:
-            with st.spinner("Contacting VSP-1 AGI..."):
-                context = {
-                    "location": location,
-                    "soil": selected_soil,
-                    "project": selected_project,
-                    "seismic": seismic,
-                }
+# SSE listener
+def sse_poll(task_id: str):
+    st.session_state[f"sse_active_{task_id}"] = True
+    url = f"{BACKEND_URL}/events/{task_id}"
+    try:
+        if SSEClient is None:
+            raise RuntimeError("sseclient not installed")
+        messages = SSEClient(url, retry=3000)
+        for msg in messages:
+            if msg.event == "progress":
                 try:
-                    response = st.session_state.agi_core.generate_insight(context, agi_prompt)
-                    st.markdown("**AGI Response:**")
-                    st.write(response)
-                except Exception as e:
-                    st.error(f"AGI request failed: {e}")
-
-# Tab: Soil Scanner
-with tab2:
-    st.header("🔬 Soil Scanner")
-    col_a, col_b = st.columns([1, 2])
-    with col_a:
-        moisture = st.slider("Soil moisture (%)", 0, 100, 25)
-        ph = st.number_input("pH level", 0.0, 14.0, 7.0)
-    with col_b:
-        st.write("Recommendations")
-        if st.button("Analyze Soil"):
-            score = 50
-            if 20 <= moisture <= 40:
-                score += 20
-            if 6.0 <= ph <= 7.5:
-                score += 20
-            st.success(f"Soil quality score: {min(score,100)}")
-
-# Tab: Live Weather
-with tab3:
-    st.header("📡 Live Weather")
-    st.write(f"Showing weather for: {location}")
-    if st.button("Fetch Sample Weather"):
-        try:
-            # simple free API example (Open-Meteo)
-            lat, lon = 18.5204, 73.8567
-            url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
-            r = requests.get(url, timeout=5)
-            data = r.json()
-            st.json(data.get("current_weather", {}))
-        except Exception as e:
-            st.error(f"Failed to fetch weather: {e}")
-
-# Tab: Satellite
-with tab4:
-    st.header("🛰️ Satellite")
-    st.info("Satellite data integrations (USGS, Sentinel) placeholder")
-
-# Tab: Location
-with tab5:
-    st.header("🌍 Location")
-    st.map(pd.DataFrame({"lat": [18.5204], "lon": [73.8567]}))
-
-# Tab: Crop
-with tab6:
-    st.header("🎯 Crop Feasibility")
-    st.write("Use soil inputs to estimate crop suitability. Placeholder UI.")
-
-# Tab: Field Docs
-with tab7:
-    st.header("📸 Field Documentation")
-    st.write("Upload and geotag photos here. Placeholder.")
-
-# Tab: Blockchain
-with tab8:
-    st.header("🔗 Blockchain Ledger")
-    st.write("Store analysis blocks (simulated). Placeholder.")
-
-# Tab: Settings
-with tab9:
-    st.header("⚙️ Settings")
-    st.write("Configuration and API key status.")
-    if "GEMINI_API_KEY" in st.secrets:
-        st.success("Gemini API Key configured in secrets")
-    else:
-        st.warning("Gemini API Key not found in st.secrets. Add it to enable AGI features.")
-
-# --- 13. AGI INTEGRATION CORE ---
-class AGISystemCore:
-    def __init__(self):
-        self.model_status = "ONLINE"
-        self.readiness = "Gemini AGI-Core Active (gemini-3.6-flash)"
-        self.api_key = None
-        self.client = None
-        try:
-            # Securely fetch the hidden key from your Streamlit vault
-            self.api_key = st.secrets["GEMINI_API_KEY"]
-            if genai is None:
-                # SDK not available in environment
-                raise RuntimeError("google-genai SDK not installed")
-            self.client = genai.Client(api_key=self.api_key)
-        except Exception:
-            # Leave client as None if anything goes wrong; UI will show a helpful message
-            self.api_key = None
-            self.client = None
-
-    def generate_insight(self, context: dict, user_prompt: str) -> str:
-        if not self.client:
-            return "⚠️ API Key not found or Client failed to initialize. Please check your Streamlit vault."
-        
-        # The AGI instructions: Granting it vast world knowledge while keeping it professional
-        system_instruction = (
-            "You are VSP-1, an elite enterprise Geological Intelligence AGI (Artificial General Intelligence). "
-            "You possess vast knowledge about everything around the world. "
-            "You provide strict, professional, highly analytical advice based on global context and geotechnical data."
-        )
-        
-        prompt = f"Current Context: {context}\n\nUser Query: {user_prompt}"
-        
-        try:
-            # Connects to Google's latest frontier model via the modern SDK
-            response = self.client.models.generate_content(
-                model="gemini-3.6-flash",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_instruction,
-                    temperature=0.3, # Keeps it highly analytical and grounded
-                )
-            )
-            # `response` object shape can vary between SDK versions; attempt to read `text` then `response.output[0].content`
-            try:
-                return response.text
-            except Exception:
-                try:
-                    return str(response.output[0].content[0].text)
+                    payload = json.loads(msg.data)
                 except Exception:
-                    return str(response)
+                    payload = {"error": "invalid json in sse"}
+                st.session_state["task_status"] = payload.get("status")
+                st.session_state["task_progress"] = int(payload.get("progress") or 0)
+                meta = payload.get("meta", {})
+                if meta.get("result"):
+                    st.session_state["task_result"] = meta.get("result")
+                if payload.get("status") in ("SUCCESS", "FAILURE"):
+                    break
+            elif msg.event == "error":
+                st.session_state["last_error"] = msg.data
+                break
+    except Exception as e:
+        st.session_state["sse_error"] = str(e)
+    finally:
+        st.session_state[f"sse_active_{task_id}"] = False
+
+# Polling fallback
+def polling_fallback(task_id: str, interval: float = 2.0):
+    st.session_state[f"poll_active_{task_id}"] = True
+    while True:
+        status = fetch_task_once(task_id)
+        if "error" in status and status.get("status") is None:
+            st.session_state["last_error"] = status.get("error")
+            break
+        st.session_state["task_status"] = status.get("status")
+        st.session_state["task_progress"] = int(status.get("progress") or 0)
+        if status.get("result"):
+            st.session_state["task_result"] = status.get("result")
+        if status.get("status") in ("SUCCESS", "FAILURE"):
+            break
+        time.sleep(interval)
+    st.session_state[f"poll_active_{task_id}"] = False
+
+# Streamlit UI
+st.set_page_config(page_title="VSP-1 Chat UI", page_icon="🛰️", layout="wide")
+lang = st.sidebar.selectbox("UI Language", options=["en", "mr"], index=0)
+labels = I18N.get(lang, I18N["en"])
+
+st.markdown(f"## {labels['title']}")
+st.write("Enterprise-grade geological chat with real-time analysis & international UI.")
+
+left_col, right_col = st.columns([3, 1])
+
+# Initialize session_state
+if "messages" not in st.session_state:
+    st.session_state["messages"] = [
+        {"role": "system", "text": "You are VSP-1: provide concise, factual geotechnical answers. If uncertain, say so.", "ts": time.time()}
+    ]
+for k in ("task_status", "task_progress", "task_result", "current_task_id", "last_error", "sse_error"):
+    if k not in st.session_state:
+        st.session_state[k] = None
+
+with right_col:
+    st.markdown("### Controls")
+    lat = st.number_input("Latitude", value=18.5204, format="%.6f")
+    lon = st.number_input("Longitude", value=73.8567, format="%.6f")
+    ui_lang = st.selectbox("Response language", options=["en", "mr"], index=0)
+    st.markdown("---")
+    with st.expander("Elevation"):
+        elev = cached_elevation(lat, lon)
+        st.json(elev)
+    st.markdown("---")
+    if st.button(labels["local_summary"]):
+        try:
+            elev = cached_elevation(lat, lon)
+            local = {
+                "coords": {"lat": lat, "lon": lon},
+                "elevation": elev,
+                "note": "Local fallback summary. For deeper, use backend analysis.",
+            }
+            st.json(local)
         except Exception as e:
-            return f"⚠️ AGI Network failure: {str(e)}"
+            st.error(f"Local summary failed: {e}")
 
-# Ensure AGI core is available in the Streamlit session state
-if 'agi_core' not in st.session_state:
-    st.session_state.agi_core = AGISystemCore()
+with left_col:
+    st.markdown("### Conversation")
+    for msg in st.session_state["messages"]:
+        role = msg["role"]
+        ts = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(msg["ts"]))
+        if role == "system":
+            st.info(f"[system] {msg['text']}\n\n*{ts}*")
+        elif role == "user":
+            st.markdown(f"**You** — {ts}\n\n{msg['text']}")
+        else:
+            st.success(f"**VSP-1** — {ts}\n\n{msg['text']}")
 
-# --- FOOTER ---
+    st.markdown("---")
+    placeholder = st.empty()
+    with placeholder.form(key="message_form", clear_on_submit=True):
+        user_input = st.text_area("Message", placeholder=labels["input_placeholder"], height=120)
+        submitted = st.form_submit_button(labels["start"])
+
+    if submitted and user_input and user_input.strip():
+        try:
+            guard = ClientGuardrails(lat=lat, lon=lon, message=user_input)
+            ClientGuardrails.check_forbidden(user_input)
+        except ValidationError as ve:
+            st.error(f"Validation error: {ve}")
+        except ValueError as ve:
+            st.error(f"Guardrail rejection: {ve}")
+        else:
+            st.session_state["messages"].append({"role": "user", "text": user_input, "ts": time.time()})
+            with st.spinner(labels["starting_analysis"]):
+                task_id = start_backend_conversation(lat, lon, user_input, ui_lang)
+                if not task_id:
+                    st.warning(labels["no_backend"])
+                else:
+                    st.session_state["current_task_id"] = task_id
+                    st.session_state["task_status"] = "PENDING"
+                    st.session_state["task_progress"] = 0
+                    st.session_state["task_result"] = None
+                    st.session_state["last_error"] = None
+                    st.session_state["sse_error"] = None
+
+                    if SSEClient is not None:
+                        t = threading.Thread(target=sse_poll, args=(task_id,), daemon=True)
+                        t.start()
+                    else:
+                        t = threading.Thread(target=polling_fallback, args=(task_id,), daemon=True)
+                        t.start()
+
+    st.markdown("### Analysis status")
+    st.write(f"Status: {st.session_state.get('task_status') or 'idle'}")
+    try:
+        st.progress(min(max(int(st.session_state.get("task_progress") or 0), 0), 100))
+    except Exception:
+        st.text(f"Progress: {st.session_state.get('task_progress')}")
+    if st.session_state.get("last_error"):
+        st.error(st.session_state.get("last_error"))
+    if st.session_state.get("sse_error"):
+        st.warning(f"SSE error: {st.session_state.get('sse_error')} — falling back to polling")
+
+    # Show result: expect backend to return ai (original) and ai_localized (mr)
+    if st.session_state.get("task_result"):
+        res = st.session_state["task_result"]
+        st.markdown("### Result (validated by backend)")
+        st.json(res)
+        ai = res.get("ai") if isinstance(res, dict) else None
+        ai_local = res.get("ai_localized") if isinstance(res, dict) else None
+
+        if ai:
+            st.markdown("#### AI Summary (Original)")
+            st.write(ai.get("summary"))
+            st.caption(f"Confidence: {ai.get('confidence')}")
+            # Append to chat history
+            st.session_state["messages"].append({"role": "assistant", "text": ai.get("summary", ""), "ts": time.time()})
+
+        if ai_local and ai_local.get("language") == "mr":
+            st.markdown("#### AI Summary (Marathi)")
+            st.write(ai_local.get("summary"))
+            st.caption("Localized (Marathi) — translated on backend")
+
 st.markdown("---")
-st.caption(f"Last loaded: {datetime.utcnow().isoformat()} UTC")
+st.caption(f"Backend: {BACKEND_URL} — SSE support: {'yes' if SSEClient is not None else 'no'}")
